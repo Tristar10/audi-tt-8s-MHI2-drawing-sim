@@ -59,6 +59,7 @@ public final class TeleSim extends JPanel {
     private final Map<Integer, Font> fonts = new HashMap<Integer, Font>();
     private BufferedImage stripTrack;
     private BufferedImage stripLit;
+    private BufferedImage stripLitRed;
 
     private volatile int view = TeleLayout.VIEW_LARGE;
     private volatile boolean painted = true;
@@ -418,6 +419,7 @@ public final class TeleSim extends JPanel {
             TeleStrip s = TeleStrip.paint(layout);
             stripTrack = argbImage(s.track);
             stripLit = argbImage(s.lit);
+            stripLitRed = argbImage(s.litRed);
         }
         if (layout.size[i] == 0) {
             g.drawImage(stripTrack, layout.x[i], layout.y[i], null);
@@ -425,7 +427,7 @@ public final class TeleSim extends JPanel {
         }
         Shape old = g.getClip();
         g.clip(new Rectangle(layout.x[i], layout.y[i], layout.w[i], layout.h[i]));
-        g.drawImage(stripLit, layout.x[i], layout.y[i], null);
+        g.drawImage(layout.size[i] == 2 ? stripLitRed : stripLit, layout.x[i], layout.y[i], null);
         g.setClip(old);
     }
 

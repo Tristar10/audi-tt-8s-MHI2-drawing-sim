@@ -8,6 +8,7 @@ import java.awt.Graphics2D;
 import java.awt.RadialGradientPaint;
 import java.awt.RenderingHints;
 import java.awt.Shape;
+import java.awt.geom.Area;
 import java.awt.geom.Ellipse2D;
 import java.awt.geom.Path2D;
 import java.awt.geom.Rectangle2D;
@@ -94,6 +95,7 @@ final class Theme {
             }
         }
         out.setRGB(0, 0, W, H, base, 0, W);
+        housings(out);
         return out;
     }
 
@@ -162,6 +164,80 @@ final class Theme {
         javax.imageio.ImageIO.write(sheet, "png", new java.io.File(a[0]));
         javax.imageio.ImageIO.write(bg, "png", new java.io.File(a[0].replace(".png", "-bg.png")));
         System.out.println("wrote " + a[0]);
+    }
+
+    /**
+     * Housings so the gauges sit in the theme instead of on it: a plate under the rev strip and one
+     * under the value block (dark glass, hairline edge, glow, drop shadow, corner brackets), and a
+     * rail under the shift lights. Drawn at full strength, after the mask.
+     */
+    private static void housings(BufferedImage img) {
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Area strip = stripShape(12);
+        Path2D.Double panel = path(340, 216, 1098, 216, 1098, 412, 1080, 430, 322, 430, 322, 234);
+        Area rail = new Area(new Rectangle2D.Double(318, 96, 746, 36));
+        for (Shape sh : new Shape[] {strip, panel, rail}) {
+            // drop shadow: the shape a few times, offset down, faint
+            for (int k = 1; k <= 6; k++) {
+                g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+                g.setColor(Color.BLACK);
+                g.fill(java.awt.geom.AffineTransform.getTranslateInstance(0, k * 1.5).createTransformedShape(sh));
+            }
+            // glow: wide faint strokes in cobalt
+            for (float w : new float[] {16f, 10f, 5f}) {
+                g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+                g.setColor(COBALT);
+                g.setStroke(new BasicStroke(w, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+                g.draw(sh);
+            }
+            g.setComposite(AlphaComposite.SrcOver.derive(0.92f));
+            g.setPaint(new java.awt.GradientPaint(0, 100, new Color(0x0A1230), 0, 440, new Color(0x03050C)));
+            g.fill(sh);
+            g.setComposite(AlphaComposite.SrcOver.derive(0.75f));
+            g.setColor(new Color(0x3E8BFF));
+            g.setStroke(new BasicStroke(1.4f));
+            g.draw(sh);
+        }
+        // corner brackets on the value panel (cyan), and a checker tab at its top left
+        g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
+        g.setColor(CYAN);
+        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(line(322, 252, 322, 234, 340, 216, 360, 216));
+        g.draw(line(1060, 430, 1080, 430, 1098, 412, 1098, 392));
+        g.setComposite(AlphaComposite.SrcOver);
+        checker(g, 344, 220, 30, 6, 3, 0.55f);
+        // the strip's corner marks: small cyan ticks where its slopes meet the middle
+        g.setColor(CYAN);
+        g.setStroke(new BasicStroke(2f));
+        int[] sx = TeleLayout.TP_X;
+        int[] sy = TeleLayout.TP_Y;
+        for (int i = 1; i <= 2; i++) {
+            g.draw(new java.awt.geom.Line2D.Double(sx[i], sy[i] - TeleLayout.HALF_MAX - 18, sx[i], sy[i] - TeleLayout.HALF_MAX - 12));
+        }
+        g.dispose();
+    }
+
+    /** The rev strip's outline grown by pad: its segments as quads plus round corners. */
+    private static Area stripShape(double pad) {
+        Area a = new Area();
+        double len = TeleLayout.tpLen();
+        double[] o = new double[4];
+        double[] q = new double[4];
+        for (double s = 0; s < len; s += 3) {
+            double s1 = Math.min(len, s + 3.5);
+            TeleLayout.tp(s, o);
+            TeleLayout.tp(s1, q);
+            double h0 = TeleLayout.half(s) + pad;
+            double h1 = TeleLayout.half(s1) + pad;
+            a.add(new Area(path(o[0] + o[2] * h0, o[1] + o[3] * h0, q[0] + q[2] * h1, q[1] + q[3] * h1,
+                q[0] - q[2] * h1, q[1] - q[3] * h1, o[0] - o[2] * h0, o[1] - o[3] * h0)));
+        }
+        for (int i = 1; i <= 2; i++) {
+            double r = TeleLayout.HALF_MAX + pad;
+            a.add(new Area(new Ellipse2D.Double(TeleLayout.TP_X[i] - r, TeleLayout.TP_Y[i] - r, 2 * r, 2 * r)));
+        }
+        return a;
     }
 
     /** 0.12 behind the gauges (strip, notch, value rows), up to 1 in the pockets and edges. */
@@ -314,6 +390,15 @@ final class Theme {
         g.draw(new java.awt.geom.Line2D.Double(x - s / 2, y - s / 2, x + s / 2, y + s / 2));
         g.draw(new java.awt.geom.Line2D.Double(x - s / 2, y + s / 2, x + s / 2, y - s / 2));
         g.setComposite(AlphaComposite.SrcOver);
+    }
+
+    private static Path2D.Double line(double... xy) {
+        Path2D.Double p = new Path2D.Double();
+        p.moveTo(xy[0], xy[1]);
+        for (int i = 2; i < xy.length; i += 2) {
+            p.lineTo(xy[i], xy[i + 1]);
+        }
+        return p;
     }
 
     private static Path2D.Double path(double... xy) {

@@ -176,7 +176,7 @@ final class Theme {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Area strip = stripShape(12);
         Path2D.Double panel = path(340, 216, 1098, 216, 1098, 412, 1080, 430, 322, 430, 322, 234);
-        Area rail = new Area(new Rectangle2D.Double(318, 96, 746, 36));
+        Area rail = new Area(new Rectangle2D.Double(720 - 338, 96, 676, 36));
         for (Shape sh : new Shape[] {strip, panel, rail}) {
             // drop shadow: the shape a few times, offset down, faint
             for (int k = 1; k <= 6; k++) {

@@ -209,17 +209,36 @@ final class Theme {
         // hatching, a cobalt glow along the inside edges. Kept well under the text.
         Shape oldClip = g.getClip();
         g.setClip(panel);
-        g.setComposite(AlphaComposite.SrcOver.derive(0.07f));
-        g.setColor(CYAN);
-        for (int r = 40, k = 0; r < 420; r += 22, k++) {
-            g.setStroke(new BasicStroke(k % 4 == 0 ? 2.4f : 1f));
-            g.draw(new Ellipse2D.Double(720 - r, 296 - r, 2 * r, 2 * r));
+        // the user's second illustration (skins/panel.jpg) inside the panel, dimmed like the first
+        // portraits: the two faces under the rpm side, glass shards and blue across the rest
+        BufferedImage pan = null;
+        try {
+            pan = javax.imageio.ImageIO.read(new java.io.File("skins", "panel.jpg"));
+        } catch (Exception e) {
+            pan = null;
         }
-        g.setComposite(AlphaComposite.SrcOver.derive(0.05f));
-        g.setColor(WHITE);
-        g.setStroke(new BasicStroke(1f));
-        for (int x = 200; x < 1300; x += 9) {
-            g.draw(new java.awt.geom.Line2D.Double(x, 440, x + 230, 210));
+        if (pan != null) {
+            java.awt.Rectangle pb = panel.getBounds();
+            for (int Y = pb.y; Y < pb.y + pb.height; Y++) {
+                for (int X = pb.x; X < pb.x + pb.width; X++) {
+                    if (!panel.contains(X + 0.5, Y + 0.5)) {
+                        continue;
+                    }
+                    int c = sample(pan, 680 + (X + 0.5 - 470) / 0.5, 650 + (Y + 0.5 - 330) / 0.5);
+                    // dim, a little desaturated, darker towards the panel's edges
+                    int cr = (c >> 16) & 0xFF;
+                    int cg = (c >> 8) & 0xFF;
+                    int cb = c & 0xFF;
+                    double l = 0.3 * cr + 0.59 * cg + 0.11 * cb;
+                    double ex = (X - 710) / 400.0;
+                    double ey = (Y - 323) / 120.0;
+                    double v = 0.36 * (1 - 0.35 * Math.min(1, ex * ex + ey * ey));
+                    cr = (int) ((cr * 0.8 + l * 0.2) * v);
+                    cg = (int) ((cg * 0.8 + l * 0.2) * v);
+                    cb = (int) ((cb * 0.8 + l * 0.2) * v);
+                    img.setRGB(X, Y, over(img.getRGB(X, Y), (cr << 16) | (cg << 8) | cb, 0.92));
+                }
+            }
         }
         for (int i = 0; i < 4; i++) {
             g.setComposite(AlphaComposite.SrcOver.derive(0.06f));

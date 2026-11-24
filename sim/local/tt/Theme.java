@@ -205,6 +205,30 @@ final class Theme {
             g.setStroke(new BasicStroke(1.4f));
             g.draw(sh);
         }
+        // faint inside of the value panel (user 2026-11-24): rings around the gear, fine diagonal
+        // hatching, a cobalt glow along the inside edges. Kept well under the text.
+        Shape oldClip = g.getClip();
+        g.setClip(panel);
+        g.setComposite(AlphaComposite.SrcOver.derive(0.07f));
+        g.setColor(CYAN);
+        for (int r = 40, k = 0; r < 420; r += 22, k++) {
+            g.setStroke(new BasicStroke(k % 4 == 0 ? 2.4f : 1f));
+            g.draw(new Ellipse2D.Double(720 - r, 296 - r, 2 * r, 2 * r));
+        }
+        g.setComposite(AlphaComposite.SrcOver.derive(0.05f));
+        g.setColor(WHITE);
+        g.setStroke(new BasicStroke(1f));
+        for (int x = 200; x < 1300; x += 9) {
+            g.draw(new java.awt.geom.Line2D.Double(x, 440, x + 230, 210));
+        }
+        for (int i = 0; i < 4; i++) {
+            g.setComposite(AlphaComposite.SrcOver.derive(0.06f));
+            g.setColor(COBALT);
+            g.setStroke(new BasicStroke(10 + i * 10));
+            g.draw(panel);
+        }
+        g.setClip(oldClip);
+        g.setComposite(AlphaComposite.SrcOver);
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);

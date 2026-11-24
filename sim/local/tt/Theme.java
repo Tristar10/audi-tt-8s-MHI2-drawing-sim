@@ -121,6 +121,10 @@ final class Theme {
      *   java -cp out local.tt.Theme OUT.png
      */
     public static void main(String[] a) throws Exception {
+        if (a.length > 0 && a[0].equals("--export")) {
+            export(a);
+            return;
+        }
         BufferedImage bg = paint();
         BufferedImage sheet = new BufferedImage(W, 2 * H + 60, BufferedImage.TYPE_INT_RGB);
         Graphics2D g = sheet.createGraphics();
@@ -285,8 +289,7 @@ final class Theme {
         for (double[] t : ticks) {
             g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
         }
-        tab(g, "DRIVER", 584, 356, false);
-        tab(g, "TURBO", 856, 356, true);
+        // (the DRIVER / TURBO tabs went with tele17: the control page uses that space)
         // 4 the two characters' colours along the panel's sides
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setStroke(new BasicStroke(2.4f));
@@ -722,6 +725,37 @@ final class Theme {
             a.add(new Area(new Ellipse2D.Double(TeleLayout.TP_X[i] - r, TeleLayout.TP_Y[i] - r, 2 * r, 2 * r)));
         }
         return a;
+    }
+
+    /**
+     * The car's theme pictures (tele17): theme-classic.rgba and theme-sport.rgba, 1440 x 540 RGBA
+     * (opaque), plus PNG previews, into DIR. Portraits as given (default colour).
+     *   java -cp out local.tt.Theme --export DIR [colour|tint|none]
+     * Copy both .rgba files to the car's /tmp, then: sh tt.sh tele theme install; sh tt.sh tele theme on
+     */
+    private static void export(String[] a) throws Exception {
+        java.io.File dir = new java.io.File(a.length > 1 ? a[1] : "theme-out");
+        dir.mkdirs();
+        String pm = a.length > 2 ? a[2] : "colour";
+        portraits = pm.equals("none") ? 0 : pm.equals("tint") ? 1 : 2;
+        String[] names = {"classic", "sport"};
+        for (int v = 0; v < 2; v++) {
+            BufferedImage img = paint(v);
+            byte[] b = new byte[W * H * 4];
+            int[] px = img.getRGB(0, 0, W, H, null, 0, W);
+            for (int i = 0; i < px.length; i++) {
+                b[4 * i] = (byte) (px[i] >> 16);
+                b[4 * i + 1] = (byte) (px[i] >> 8);
+                b[4 * i + 2] = (byte) px[i];
+                b[4 * i + 3] = (byte) 255;
+            }
+            java.io.File f = new java.io.File(dir, "theme-" + names[v] + ".rgba");
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(b);
+            o.close();
+            javax.imageio.ImageIO.write(img, "png", new java.io.File(dir, "theme-" + names[v] + ".png"));
+            System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
+        }
     }
 
     /** 0.12 behind the gauges (strip, notch, value rows), up to 1 in the pockets and edges. */

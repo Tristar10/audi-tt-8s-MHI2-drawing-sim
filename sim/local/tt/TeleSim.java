@@ -91,6 +91,8 @@ public final class TeleSim extends JPanel {
     private long sampleSeq;
     private long seenSeq = -1;
     private final int[] lastRaw = new int[TeleLayout.CHANNELS];
+    private final TeleGlide teleGlide = new TeleGlide();
+    private final TeleUi ui = new TeleUi();
     private final double[] prev = new double[TeleLayout.CHANNELS];
     private final double[] cur = new double[TeleLayout.CHANNELS];
     private long prevAt;
@@ -156,6 +158,10 @@ public final class TeleSim extends JPanel {
                 pieces = true;
             } else if (a[i].equals("--set")) {
                 sets.add(a[++i]);
+            } else if (a[i].equals("--ui")) {
+                for (String u : a[++i].split(",")) {
+                    TeleUi.post(TeleUi.action(u));
+                }
             } else if (a[i].equals("--theme")) {
                 themeOn = true;
             } else if (a[i].equals("--portraits")) {
@@ -169,7 +175,7 @@ public final class TeleSim extends JPanel {
                 shotFile = a[++i];
             } else {
                 System.out.println("usage: TeleSim [--live] [--key N] [--hz 15|20|30|60] [--scale 0.9] [--photos dir]"
-                    + " [--sport] [--pieces] [--glide] [--photo] [--theme] [--portraits tint|colour|eyes] [--set NAME=VALUE]... [--shot SECONDS FILE.png]");
+                    + " [--sport] [--pieces] [--glide] [--photo] [--theme] [--ui open,down,press,...] [--portraits tint|colour|eyes] [--set NAME=VALUE]... [--shot SECONDS FILE.png]");
                 return;
             }
         }
@@ -302,29 +308,20 @@ public final class TeleSim extends JPanel {
                 }
             }
         }
-        if (seq != seenSeq) {
-            seenSeq = seq;
-            prevAt = curAt;
-            curAt = now;
-            for (int k = 0; k < GLIDE_CH.length; k++) {
-                int ch = GLIDE_CH[k];
-                prev[ch] = cur[ch];
-                cur[ch] = layout.val[ch];
-                lastRaw[ch] = layout.val[ch];
-            }
+        boolean fresh = seq != seenSeq;
+        seenSeq = seq;
+        for (int k = 0; k < GLIDE_CH.length; k++) {
+            lastRaw[GLIDE_CH[k]] = layout.val[GLIDE_CH[k]];
         }
         for (Map.Entry<Integer, Integer> e : fixed.entrySet()) {
             layout.val[e.getKey()] = e.getValue();
             layout.has[e.getKey()] = true;
         }
-        if (glide && prevAt > 0 && curAt > prevAt) {
-            // one sample late: move from the previous sample to the newest over one sample period
-            double f = Math.min(1.0, (now - curAt) / (double) (curAt - prevAt));
-            for (int k = 0; k < GLIDE_CH.length; k++) {
-                int ch = GLIDE_CH[k];
-                layout.val[ch] = (int) Math.round(prev[ch] + (cur[ch] - prev[ch]) * f);
-            }
+        if (glide) {
+            teleGlide.apply(layout, now, demo && fresh); // the head unit's own glide (TeleGlide)
         }
+        TeleLink.demoLink = demo;
+        ui.tick(layout, now); // the Haldex control page (TeleUi), as on the head unit
     }
 
     // ---------------------------------------------------------------- drawing (like TelePreview)
@@ -504,7 +501,7 @@ public final class TeleSim extends JPanel {
                 + "%d slots | %s | %s", view == 0 ? "Classic" : "Sport", painted ? "painted" : "pieces",
             glide ? "on" : "off", TICK_HZ[tickHzI], fps, buildMs, drawMs, slots, BG_NAMES[bgMode], data), 8, fh + 16);
         g.setColor(Color.GRAY);
-        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B background  T theme  H readout  S save PNG",
+        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B background  T theme  O Haldex control (arrows, Enter, Backspace)  H readout  S save PNG",
             8, fh + 33);
         g.setStroke(new BasicStroke(1));
     }
@@ -531,6 +528,22 @@ public final class TeleSim extends JPanel {
                 break;
             case KeyEvent.VK_B:
                 bgMode = (bgMode + 1) % BG_NAMES.length;
+                break;
+            case KeyEvent.VK_O:
+                TeleUi.post(TeleUi.OPEN);
+                break;
+            case KeyEvent.VK_UP:
+                TeleUi.post(TeleUi.UP);
+                break;
+            case KeyEvent.VK_DOWN:
+                TeleUi.post(TeleUi.DOWN);
+                break;
+            case KeyEvent.VK_ENTER:
+                TeleUi.post(TeleUi.PRESS);
+                break;
+            case KeyEvent.VK_BACK_SPACE:
+            case KeyEvent.VK_ESCAPE:
+                TeleUi.post(TeleUi.BACK);
                 break;
             case KeyEvent.VK_T:
                 theme = !theme;

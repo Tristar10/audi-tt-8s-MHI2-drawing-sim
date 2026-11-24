@@ -4,7 +4,7 @@
 set -e
 cd "$(dirname "$0")"
 ALT=${1:-../altscreen_telemetry/ports/tt-8s-mu1462}
-for f in TeleLayout TeleIcons TeleStrip TeleLink; do
+for f in TeleLayout TeleIcons TeleStrip TeleLink TeleGlide TeleUi; do
     cp "$ALT/hmi/src/local/tt/$f.java" src/local/tt/
 done
 cp "$ALT/docs/photos/cockpit-large-view.jpg" "$ALT/docs/photos/cockpit-small-view.jpg" photos/

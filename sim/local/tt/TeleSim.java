@@ -466,9 +466,9 @@ public final class TeleSim extends JPanel {
         Area v;
         if (view == TeleLayout.VIEW_LARGE) {
             v = new Area(new Rectangle(0, 0, SW, SH));
-            v.subtract(new Area(new Ellipse2D.Double(190 - 128, 386 - 128, 256, 256))); // rev counter
-            v.subtract(new Area(new Ellipse2D.Double(1220 - 128, 383 - 128, 256, 256))); // speedometer
-            v.subtract(new Area(new Rectangle(428, 40, 560, 54))); // tab bar
+            v.subtract(new Area(new Ellipse2D.Double(205 - 128, 386 - 128, 256, 256))); // rev counter (symmetric about x 720)
+            v.subtract(new Area(new Ellipse2D.Double(1235 - 128, 386 - 128, 256, 256))); // speedometer
+            v.subtract(new Area(new Rectangle(440, 40, 560, 54))); // tab bar, centred on 720
             v.subtract(new Area(new Rectangle(0, 464, SW, 76))); // bottom bar
             v.subtract(new Area(new Polygon(new int[] {0, 290, 0}, new int[] {0, 0, 110}, 3))); // frame
             v.subtract(new Area(new Polygon(new int[] {1100, 1440, 1440}, new int[] {0, 0, 108}, 3)));

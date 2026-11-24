@@ -54,10 +54,10 @@ final class Theme {
         // the slanted parallelogram stripes of the first sketch along the sill line (user preferred
         // them to chevrons)
         stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
-        arch(g, 190, 386, 150, 22, WHITE, 0.16f);
-        arch(g, 190, 386, 172, 6, CYAN, 0.35f);
-        arch(g, 1220, 383, 150, 22, WHITE, 0.16f);
-        arch(g, 1220, 383, 172, 6, CYAN, 0.35f);
+        arch(g, 205, 386, 150, 22, WHITE, 0.16f);
+        arch(g, 205, 386, 172, 6, CYAN, 0.35f);
+        arch(g, 1235, 386, 150, 22, WHITE, 0.16f);
+        arch(g, 1235, 386, 172, 6, CYAN, 0.35f);
         checker(g, 336, 448, 220, 12, 6, 0.30f);
         checker(g, 864, 448, 220, 12, 6, 0.30f);
         // target rings (the livery's circle motif), behind the left pocket and lower right
@@ -143,9 +143,9 @@ final class Theme {
         g.draw(strip);
         g.draw(new Rectangle2D.Double(325, 100, 732, 30)); // shift lights
         g.draw(new Rectangle2D.Double(330, 226, 760, 196)); // values, notch, boost, temperatures
-        g.draw(new Ellipse2D.Double(62, 258, 256, 256)); // stock rev counter
-        g.draw(new Ellipse2D.Double(1092, 255, 256, 256)); // stock speedometer
-        g.draw(new Rectangle2D.Double(428, 40, 560, 54)); // stock tab bar
+        g.draw(new Ellipse2D.Double(77, 258, 256, 256)); // stock rev counter
+        g.draw(new Ellipse2D.Double(1107, 258, 256, 256)); // stock speedometer
+        g.draw(new Rectangle2D.Double(440, 40, 560, 54)); // stock tab bar
         g.draw(new Rectangle2D.Double(0, 464, W, 76)); // stock bottom bar
         g.setFont(new Font(Chrome.FAMILY, Font.PLAIN, 15));
         g.drawString("rev strip", 600, 176);

@@ -54,8 +54,8 @@ final class Chrome {
 
     static void classic(Graphics2D g, int rpm, int mph) {
         backdrop(g);
-        smallDial(g, 190, 386, 128, rpm / 8000.0, true, "D", "READY");
-        smallDial(g, 1220, 383, 128, mph / 160.0, false, Integer.toString(mph), "MPH");
+        smallDial(g, 205, 386, 128, rpm / 8000.0, true, "D", "READY");
+        smallDial(g, 1235, 386, 128, mph / 160.0, false, Integer.toString(mph), "MPH");
         tabBar(g);
         bottomBar(g, 720);
     }

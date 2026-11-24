@@ -32,7 +32,7 @@ final class Theme {
     private Theme() {
     }
 
-    /** Portraits from skins/art.jpg (the user's two-character illustration): 0 none, 1 tinted, 2 colour. */
+    /** Portraits from skins/art.jpg (the user's two-character illustration): 0 none, 1 tinted, 2 colour, 3 eye strips. */
     static int portraits = 0;
 
     static BufferedImage paint() {
@@ -240,9 +240,154 @@ final class Theme {
             System.out.println("no skins/art.jpg: portraits off");
             return;
         }
-        // src x y w h, dest x y, scale; face kept in the pocket above each slope
-        portrait(out, art, 470, 260, 700, 860, -40, -70, 0.46);   // pink, left
-        portrait(out, art, 1040, 150, 600, 780, 1165, -80, 0.50); // white-haired, right
+        if (portraits == 3) {
+            // Eye strips (user 2026-11-24: the pockets are too short for faces). Each is a band
+            // across the eyes, turned so they are level, in a panel slanted along its slope.
+            // art: eye A, eye B (A left of B once level), band height in art px
+            eyePanel(out, art, 915, 790, 1020, 580, 170, 0, 40, 300, 104, 162); // pink, left slope
+            eyePanel(out, art, 1365, 405, 1490, 505, 130, 2, 60, 330, 110, 160); // white-haired, right slope
+            return;
+        }
+        // Centred on the eyes (user 2026-11-24): art point between the eyes -> screen point, scale,
+        // and a wide, short fade so the eyes carry it and the mouth falls outside.
+        // pink: her eyes run diagonally (she lies sideways), so centred on the big one
+        eyesPortrait(out, art, 935, 755, 0.78, 128, 142, 128, 92);    // pink, left pocket
+        eyesPortrait(out, art, 1422, 448, 0.92, 1350, 132, 128, 74);  // white-haired, right pocket
+    }
+
+    /**
+     * A panel along strip segment seg (0 left slope, 2 right slope) from s0 to s1 (along the
+     * segment) and o0 to o1 px out from its centre line, filled with the art band across the eyes
+     * (eye A at the panel's left third, eye B at its right third), framed like a manga panel.
+     */
+    private static void eyePanel(BufferedImage out, BufferedImage art, double ax, double ay, double bx, double by,
+                                 double bandH, int seg, double s0, double s1, double o0, double o1) {
+        int[] tx = TeleLayout.TP_X;
+        int[] ty = TeleLayout.TP_Y;
+        double px0 = tx[seg];
+        double py0 = ty[seg];
+        double L = Math.hypot(tx[seg + 1] - px0, ty[seg + 1] - py0);
+        double ux = (tx[seg + 1] - px0) / L;
+        double uy = (ty[seg + 1] - py0) / L;
+        double nx = uy; // outward normal (up, away from the screen centre), as TeleLayout.tp
+        double ny = -ux;
+        // art frame: e along the eyes, d "down" the face
+        double ex = bx - ax;
+        double ey = by - ay;
+        double eyeDist = Math.hypot(ex, ey);
+        ex /= eyeDist;
+        ey /= eyeDist;
+        double dx = -ey;
+        double dy = ex;
+        double cx = (ax + bx) / 2;
+        double cy = (ay + by) / 2;
+        double pw = s1 - s0;
+        double ph = o1 - o0;
+        double k = eyeDist * 3.0 / pw; // art px per panel px: the eyes at the thirds... spread
+        double kv = bandH / ph;
+        double kk = Math.max(k, kv); // keep the art's proportions
+        boolean left = seg == 0;
+        for (int Y = 0; Y < H; Y++) {
+            for (int X = 0; X < W; X++) {
+                double rx = X + 0.5 - px0;
+                double ry = Y + 0.5 - py0;
+                double s = rx * ux + ry * uy;
+                double o = rx * nx + ry * ny;
+                if (s < s0 || s > s1 || o < o0 || o > o1) {
+                    continue;
+                }
+                // panel coords: u across (left to right on screen), v down
+                double u = (left ? s - s0 : s1 - s) - pw / 2;
+                if (!left) {
+                    u = (s - s0) - pw / 2; // right slope runs left to right too
+                }
+                double v = (o1 - o) - ph / 2;
+                double sx = cx + (u * ex + v * dx) * kk;
+                double sy = cy + (u * ey + v * dy) * kk;
+                int ix = (int) Math.max(0, Math.min(art.getWidth() - 1, sx));
+                int iy = (int) Math.max(0, Math.min(art.getHeight() - 1, sy));
+                int c = art.getRGB(ix, iy);
+                // soft fade at the panel's long ends
+                double fe = Math.min(1, Math.min(s - s0, s1 - s) / 30.0);
+                double a = 0.9 * fe;
+                int dim = ((int) (((c >> 16) & 0xFF) * 0.8) << 16) | ((int) (((c >> 8) & 0xFF) * 0.8) << 8)
+                    | (int) ((c & 0xFF) * 0.8);
+                out.setRGB(X, Y, over(out.getRGB(X, Y), dim, a));
+            }
+        }
+        // frame: hairline edges along the slope, cyan, and short ticks at the ends
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setColor(new Color(0x3E8BFF));
+        g.setStroke(new BasicStroke(1.6f));
+        for (double o : new double[] {o0, o1}) {
+            g.draw(new java.awt.geom.Line2D.Double(px0 + ux * (s0 + 20) + nx * o, py0 + uy * (s0 + 20) + ny * o,
+                px0 + ux * (s1 - 20) + nx * o, py0 + uy * (s1 - 20) + ny * o));
+        }
+        g.setColor(CYAN);
+        g.setStroke(new BasicStroke(3f));
+        g.draw(new java.awt.geom.Line2D.Double(px0 + ux * (s1 - 20) + nx * o1, py0 + uy * (s1 - 20) + ny * o1,
+            px0 + ux * (s1 - 60) + nx * o1, py0 + uy * (s1 - 60) + ny * o1));
+        g.draw(new java.awt.geom.Line2D.Double(px0 + ux * (s0 + 20) + nx * o0, py0 + uy * (s0 + 20) + ny * o0,
+            px0 + ux * (s0 + 60) + nx * o0, py0 + uy * (s0 + 60) + ny * o0));
+        g.dispose();
+    }
+
+    private static void eyesPortrait(BufferedImage out, BufferedImage art, double ecx, double ecy, double sc,
+                                     double dcx, double dcy, double rx, double ry) {
+        int x0 = (int) Math.max(0, dcx - 2.2 * rx);
+        int x1 = (int) Math.min(W, dcx + 2.2 * rx);
+        int y0 = (int) Math.max(0, dcy - 2.2 * ry);
+        int y1 = (int) Math.min(H, dcy + 2.2 * ry);
+        for (int Y = y0; Y < y1; Y++) {
+            for (int X = x0; X < x1; X++) {
+                double ex = (X + 0.5 - dcx) / rx;
+                double ey = (Y + 0.5 - dcy) / ry;
+                double r = Math.sqrt(ex * ex + ey * ey);
+                double a = 1 - smooth((r - 0.45) / 0.55);
+                if (a <= 0) {
+                    continue;
+                }
+                // bilinear sample of the art
+                double sx = ecx + (X + 0.5 - dcx) / sc;
+                double sy = ecy + (Y + 0.5 - dcy) / sc;
+                int c = sample(art, sx, sy);
+                int cr = (c >> 16) & 0xFF;
+                int cg = (c >> 8) & 0xFF;
+                int cb = c & 0xFF;
+                int col;
+                if (portraits == 1) {
+                    col = ramp((0.3 * cr + 0.59 * cg + 0.11 * cb) / 255.0);
+                    a *= 0.85;
+                } else {
+                    col = (int) (cr * 0.8) << 16 | (int) (cg * 0.8) << 8 | (int) (cb * 0.8);
+                    a *= 0.95;
+                }
+                out.setRGB(X, Y, over(out.getRGB(X, Y), col, a));
+            }
+        }
+    }
+
+    private static int sample(BufferedImage im, double x, double y) {
+        int ix = (int) Math.floor(x - 0.5);
+        int iy = (int) Math.floor(y - 0.5);
+        double fx = x - 0.5 - ix;
+        double fy = y - 0.5 - iy;
+        int[] c = new int[4];
+        int k = 0;
+        for (int j = 0; j < 2; j++) {
+            for (int i = 0; i < 2; i++) {
+                c[k++] = im.getRGB(Math.max(0, Math.min(im.getWidth() - 1, ix + i)),
+                    Math.max(0, Math.min(im.getHeight() - 1, iy + j)));
+            }
+        }
+        int o = 0;
+        for (int sh = 0; sh <= 16; sh += 8) {
+            double v = ((c[0] >> sh) & 0xFF) * (1 - fx) * (1 - fy) + ((c[1] >> sh) & 0xFF) * fx * (1 - fy)
+                + ((c[2] >> sh) & 0xFF) * (1 - fx) * fy + ((c[3] >> sh) & 0xFF) * fx * fy;
+            o |= ((int) Math.round(v) & 0xFF) << sh;
+        }
+        return o;
     }
 
     private static void portrait(BufferedImage out, BufferedImage art, int sx, int sy, int sw, int sh, int dx, int dy,

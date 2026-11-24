@@ -47,7 +47,9 @@ final class Theme {
         f.dispose();
         fadeFromCorners(fac);
         g.drawImage(fac, 0, 0, null);
-        chevrons(g, 0, 434, W, 26, COBALT, 0.75f);
+        // the slanted parallelogram stripes of the first sketch along the sill line (user preferred
+        // them to chevrons)
+        stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
         arch(g, 190, 386, 150, 22, WHITE, 0.16f);
         arch(g, 190, 386, 172, 6, CYAN, 0.35f);
         arch(g, 1220, 383, 150, 22, WHITE, 0.16f);

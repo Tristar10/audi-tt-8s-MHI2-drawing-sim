@@ -32,6 +32,9 @@ final class Theme {
     private Theme() {
     }
 
+    /** Portraits from skins/art.jpg (the user's two-character illustration): 0 none, 1 tinted, 2 colour. */
+    static int portraits = 0;
+
     static BufferedImage paint() {
         BufferedImage pat = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = pat.createGraphics();
@@ -95,6 +98,9 @@ final class Theme {
             }
         }
         out.setRGB(0, 0, W, H, base, 0, W);
+        if (portraits > 0) {
+            portraitsOn(out);
+        }
         housings(out);
         return out;
     }
@@ -216,6 +222,90 @@ final class Theme {
             g.draw(new java.awt.geom.Line2D.Double(sx[i], sy[i] - TeleLayout.HALF_MAX - 18, sx[i], sy[i] - TeleLayout.HALF_MAX - 12));
         }
         g.dispose();
+    }
+
+    /**
+     * The two characters, large, at the sides: each a crop of the illustration faded softly into
+     * the pattern (no cut-out), partly behind the stock dials and the housings. Tinted: mapped to
+     * the livery's blues by brightness. Colour: the art itself, dimmed.
+     */
+    private static void portraitsOn(BufferedImage out) {
+        BufferedImage art;
+        try {
+            art = javax.imageio.ImageIO.read(new java.io.File("skins", "art.jpg"));
+        } catch (Exception e) {
+            art = null;
+        }
+        if (art == null) {
+            System.out.println("no skins/art.jpg: portraits off");
+            return;
+        }
+        // src x y w h, dest x y, scale; face kept in the pocket above each slope
+        portrait(out, art, 470, 260, 700, 860, -40, -70, 0.46);   // pink, left
+        portrait(out, art, 1040, 150, 600, 780, 1165, -80, 0.50); // white-haired, right
+    }
+
+    private static void portrait(BufferedImage out, BufferedImage art, int sx, int sy, int sw, int sh, int dx, int dy,
+                                 double sc) {
+        int dw = (int) Math.round(sw * sc);
+        int dh = (int) Math.round(sh * sc);
+        BufferedImage p = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = p.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.drawImage(art, 0, 0, dw, dh, sx, sy, sx + sw, sy + sh, null);
+        g.dispose();
+        for (int y = 0; y < dh; y++) {
+            for (int x = 0; x < dw; x++) {
+                int X = dx + x;
+                int Y = dy + y;
+                if (X < 0 || Y < 0 || X >= W || Y >= H) {
+                    continue;
+                }
+                // soft oval fade, and nothing behind the value panel
+                double ex = (x + 0.5 - dw / 2.0) / (dw / 2.0);
+                double ey = (y + 0.5 - dh / 2.0) / (dh / 2.0);
+                double r = Math.sqrt(ex * ex + ey * ey);
+                double a = 1 - smooth((r - 0.55) / 0.45);
+                a *= smooth(Math.max(Math.max(330 - X, X - 1090), Math.max(118 - Y, Y - 425)) / 60.0 + 0.0001);
+                if (a <= 0) {
+                    continue;
+                }
+                int c = p.getRGB(x, y);
+                int cr = (c >> 16) & 0xFF;
+                int cg = (c >> 8) & 0xFF;
+                int cb = c & 0xFF;
+                int col;
+                if (portraits == 1) {
+                    double l = (0.3 * cr + 0.59 * cg + 0.11 * cb) / 255.0;
+                    col = ramp(l);
+                    a *= 0.75;
+                } else {
+                    col = (int) (cr * 0.5) << 16 | (int) (cg * 0.5) << 8 | (int) (cb * 0.5);
+                    a *= 0.85;
+                }
+                int d = out.getRGB(X, Y);
+                out.setRGB(X, Y, over(d, col, a));
+            }
+        }
+    }
+
+    private static double smooth(double t) {
+        t = Math.max(0, Math.min(1, t));
+        return t * t * (3 - 2 * t);
+    }
+
+    /** Brightness to the livery's blues: navy, cobalt, cyan, pale blue. */
+    private static int ramp(double l) {
+        int[] st = {0x020616, 0x0B2A9C, 0x1E5BFF, 0x5FD0FF, 0xCFEFFF};
+        double f = Math.max(0, Math.min(0.999, l)) * (st.length - 1);
+        int i = (int) f;
+        double t = f - i;
+        int a = st[i];
+        int b = st[i + 1];
+        int r = (int) (((a >> 16) & 0xFF) * (1 - t) + ((b >> 16) & 0xFF) * t);
+        int g = (int) (((a >> 8) & 0xFF) * (1 - t) + ((b >> 8) & 0xFF) * t);
+        int bb = (int) ((a & 0xFF) * (1 - t) + (b & 0xFF) * t);
+        return (r << 16) | (g << 8) | bb;
     }
 
     /** The rev strip's outline grown by pad: its segments as quads plus round corners. */

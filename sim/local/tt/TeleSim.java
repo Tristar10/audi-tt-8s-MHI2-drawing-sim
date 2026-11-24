@@ -157,6 +157,8 @@ public final class TeleSim extends JPanel {
                 sets.add(a[++i]);
             } else if (a[i].equals("--theme")) {
                 themeOn = true;
+            } else if (a[i].equals("--portraits")) {
+                Theme.portraits = a[++i].equals("colour") ? 2 : a[i].equals("tint") ? 1 : 0;
             } else if (a[i].equals("--photo")) {
                 bgPhoto = true;
             } else if (a[i].equals("--glide")) {
@@ -166,7 +168,7 @@ public final class TeleSim extends JPanel {
                 shotFile = a[++i];
             } else {
                 System.out.println("usage: TeleSim [--live] [--key N] [--hz 15|20|30|60] [--scale 0.9] [--photos dir]"
-                    + " [--sport] [--pieces] [--glide] [--photo] [--theme] [--set NAME=VALUE]... [--shot SECONDS FILE.png]");
+                    + " [--sport] [--pieces] [--glide] [--photo] [--theme] [--portraits tint|colour] [--set NAME=VALUE]... [--shot SECONDS FILE.png]");
                 return;
             }
         }

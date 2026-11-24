@@ -45,7 +45,7 @@ public final class TeleSim extends JPanel {
     private static final int SW = TeleLayout.SCREEN_W;
     private static final int SH = TeleLayout.SCREEN_H;
     private static final String FONT = Chrome.FAMILY;
-    private static final String[] BG_NAMES = {"drawn cockpit", "phone photo", "black"};
+    private static final String[] BG_NAMES = {"skin", "drawn cockpit", "phone photo", "black"};
     private static final int[] GLIDE_CH = {TeleLayout.CH_RPM, TeleLayout.CH_SPEED, TeleLayout.CH_PEDAL,
         TeleLayout.CH_BOOST, TeleLayout.CH_BRAKE, TeleLayout.CH_HX_TARGET, TeleLayout.CH_HX_ACTUAL};
     private static final int[] DATA_HZ = {10, 20, 50};
@@ -64,8 +64,9 @@ public final class TeleSim extends JPanel {
     private volatile boolean painted = true;
     private volatile boolean demo;
     private volatile boolean glide;
-    /** 0 the stock cockpit drawn clean (Chrome), 1 the phone photos, 2 black. */
+    /** 0 skin (pieces of a real cockpit picture, skins/), 1 drawn (Chrome), 2 phone photos, 3 black. */
     private volatile int bgMode = 0;
+    private final Skin[] skin = new Skin[2];
     private volatile boolean hud = true;
     private volatile int dataHzI = 1;
     private volatile int tickHzI = 2;
@@ -99,6 +100,8 @@ public final class TeleSim extends JPanel {
         }
         photo[0] = read(new File(photos, "cockpit-large-view.jpg"));
         photo[1] = read(new File(photos, "cockpit-small-view.jpg"));
+        skin[0] = Skin.load(new File("skins", "classic.skin"));
+        skin[1] = Skin.load(new File("skins", "sport.skin"));
         setPreferredSize(new Dimension(SW, SH + 40));
         setBackground(Color.BLACK);
         setFocusable(true);
@@ -154,7 +157,7 @@ public final class TeleSim extends JPanel {
         sim.view = view;
         sim.painted = !pieces;
         sim.glide = glide;
-        sim.bgMode = bgPhoto ? 1 : 0;
+        sim.bgMode = bgPhoto ? 2 : 0;
         sim.shotAt = shotAfter < 0 ? -1 : System.currentTimeMillis() + (long) (shotAfter * 1000);
         sim.shotFile = shotFile;
         final double sc = scale;
@@ -171,7 +174,7 @@ public final class TeleSim extends JPanel {
             }
         });
         System.out.println("keys: V view, P painted strip, D demo/live, G glide, R demo data rate, F tick rate, "
-            + "B background (drawn/photo/black), H readout, S save PNG");
+            + "B background (skin/drawn/photo/black), H readout, S save PNG");
         sim.loop();
     }
 
@@ -294,7 +297,13 @@ public final class TeleSim extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, SW, SH);
         BufferedImage bg = photo[view];
-        if (bgMode == 0) {
+        int mode = bgMode == 0 && skin[view] == null ? 1 : bgMode; // no skin: draw the cockpit
+        if (mode == 0) {
+            g.setColor(Color.BLACK);
+            g.fillRect(0, 0, SW, SH);
+            skin[view].paint(g);
+            g.setClip(visible(view));
+        } else if (mode == 1) {
             int rpm = layout.has[TeleLayout.CH_RPM] ? layout.val[TeleLayout.CH_RPM] / 1000 : 0;
             int mph;
             if (layout.has[TeleLayout.CH_SPEED]) {
@@ -310,7 +319,7 @@ public final class TeleSim extends JPanel {
                 Chrome.sport(g, rpm, mph);
             }
             g.setClip(visible(view));
-        } else if (bgMode == 1 && bg != null) {
+        } else if (mode == 2 && bg != null) {
             g.drawImage(bg, 0, 0, SW, bg.getHeight() * SW / bg.getWidth(), null);
             g.setClip(visible(view));
         }

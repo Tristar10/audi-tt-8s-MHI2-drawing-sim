@@ -43,6 +43,14 @@ Keys in the window:
 | H | Readout on / off (tick rate, frames drawn, layout and draw time, link) |
 | S | Save the frame as `sim-<time>.png` |
 
+## Backgrounds
+
+B cycles: **skin** (pieces of a real cockpit picture, layered: `skins/*.skin` says what to cut out
+and where it goes on the car's screen; the pictures stay out of the repository, see
+`skins/README.md`), **drawn** (the cockpit drawn by `Chrome.java`, used when a view has no skin),
+**phone photo**, **black**. `skins/classic.skin` takes the dials, tab bar and bottom bar from the
+owner's manual's 620 x 272 cockpit screenshot.
+
 ## Live data
 
 With `--live` the receiver binds the first free port of UDP 49162..49153, as on the head unit,

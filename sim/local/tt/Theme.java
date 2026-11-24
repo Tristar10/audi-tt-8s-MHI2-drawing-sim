@@ -756,6 +756,59 @@ final class Theme {
             javax.imageio.ImageIO.write(img, "png", new java.io.File(dir, "theme-" + names[v] + ".png"));
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+        String[] cn = {"up", "side"};
+        for (int k = 0; k < 2; k++) {
+            BufferedImage c = carPicture(k == 1);
+            if (c == null) {
+                System.out.println("no skins/car-top.png: no car pictures");
+                break;
+            }
+            int[] px = c.getRGB(0, 0, c.getWidth(), c.getHeight(), null, 0, c.getWidth());
+            byte[] b = new byte[px.length * 4];
+            for (int i = 0; i < px.length; i++) {
+                b[4 * i] = (byte) (px[i] >> 16);
+                b[4 * i + 1] = (byte) (px[i] >> 8);
+                b[4 * i + 2] = (byte) px[i];
+                b[4 * i + 3] = (byte) (px[i] >>> 24);
+            }
+            java.io.File f = new java.io.File(dir, "hx-car-" + cn[k] + ".rgba");
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(b);
+            o.close();
+            System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
+        }
+    }
+
+    /**
+     * The Haldex page's car picture (skins/car-top.png, nose up) at a size: upright, or turned so
+     * the nose points right. Null when the file is missing.
+     */
+    static BufferedImage carPicture(boolean side) {
+        BufferedImage src;
+        try {
+            src = javax.imageio.ImageIO.read(new java.io.File("skins", "car-top.png"));
+        } catch (Exception e) {
+            return null;
+        }
+        if (src == null) {
+            return null;
+        }
+        int w = side ? TeleLayout.CAR_SIDE_W : TeleLayout.CAR_UP_W;
+        int h = side ? TeleLayout.CAR_SIDE_H : TeleLayout.CAR_UP_H;
+        BufferedImage out = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = out.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        if (side) {
+            // nose right: turn the upright picture 90 degrees clockwise
+            g.translate(w, 0);
+            g.rotate(Math.PI / 2);
+            g.drawImage(src, 0, 0, h, w, null);
+        } else {
+            g.drawImage(src, 0, 0, w, h, null);
+        }
+        g.dispose();
+        return out;
     }
 
     /** 0.12 behind the gauges (strip, notch, value rows), up to 1 in the pockets and edges. */

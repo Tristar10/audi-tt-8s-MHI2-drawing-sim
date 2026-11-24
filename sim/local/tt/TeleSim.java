@@ -38,12 +38,14 @@ import javax.swing.SwingUtilities;
  * at 70 % there), EAL quirks (tilt sign, blending, clipping) and the head unit's speed.
  *
  * Keys: V view (Classic/Sport), P painted strip on/off, D demo/live UDP, G glide on/off,
- * R demo data rate (10/20/50 Hz), F tick rate (15/20/30/60 Hz), B photo on/off, H readout, S save PNG.
+ * R demo data rate (10/20/50 Hz), F tick rate (15/20/30/60 Hz), B background (the stock cockpit drawn
+ * clean, the phone photos, black), H readout, S save PNG.
  */
 public final class TeleSim extends JPanel {
     private static final int SW = TeleLayout.SCREEN_W;
     private static final int SH = TeleLayout.SCREEN_H;
-    private static final String FONT = "Bahnschrift";
+    private static final String FONT = Chrome.FAMILY;
+    private static final String[] BG_NAMES = {"drawn cockpit", "phone photo", "black"};
     private static final int[] GLIDE_CH = {TeleLayout.CH_RPM, TeleLayout.CH_SPEED, TeleLayout.CH_PEDAL,
         TeleLayout.CH_BOOST, TeleLayout.CH_BRAKE, TeleLayout.CH_HX_TARGET, TeleLayout.CH_HX_ACTUAL};
     private static final int[] DATA_HZ = {10, 20, 50};
@@ -62,7 +64,8 @@ public final class TeleSim extends JPanel {
     private volatile boolean painted = true;
     private volatile boolean demo;
     private volatile boolean glide;
-    private volatile boolean showPhoto = true;
+    /** 0 the stock cockpit drawn clean (Chrome), 1 the phone photos, 2 black. */
+    private volatile int bgMode = 0;
     private volatile boolean hud = true;
     private volatile int dataHzI = 1;
     private volatile int tickHzI = 2;
@@ -118,6 +121,7 @@ public final class TeleSim extends JPanel {
         int view = TeleLayout.VIEW_LARGE;
         boolean pieces = false;
         boolean glide = false;
+        boolean bgPhoto = false;
         for (int i = 0; i < a.length; i++) {
             if (a[i].equals("--live")) {
                 demo = false;
@@ -133,6 +137,8 @@ public final class TeleSim extends JPanel {
                 view = TeleLayout.VIEW_SMALL;
             } else if (a[i].equals("--pieces")) {
                 pieces = true;
+            } else if (a[i].equals("--photo")) {
+                bgPhoto = true;
             } else if (a[i].equals("--glide")) {
                 glide = true;
             } else if (a[i].equals("--shot")) {
@@ -140,7 +146,7 @@ public final class TeleSim extends JPanel {
                 shotFile = a[++i];
             } else {
                 System.out.println("usage: TeleSim [--live] [--key N] [--hz 15|20|30|60] [--scale 0.9] [--photos dir]"
-                    + " [--sport] [--pieces] [--glide] [--shot SECONDS FILE.png]");
+                    + " [--sport] [--pieces] [--glide] [--photo] [--shot SECONDS FILE.png]");
                 return;
             }
         }
@@ -148,6 +154,7 @@ public final class TeleSim extends JPanel {
         sim.view = view;
         sim.painted = !pieces;
         sim.glide = glide;
+        sim.bgMode = bgPhoto ? 1 : 0;
         sim.shotAt = shotAfter < 0 ? -1 : System.currentTimeMillis() + (long) (shotAfter * 1000);
         sim.shotFile = shotFile;
         final double sc = scale;
@@ -164,7 +171,7 @@ public final class TeleSim extends JPanel {
             }
         });
         System.out.println("keys: V view, P painted strip, D demo/live, G glide, R demo data rate, F tick rate, "
-            + "B photo, H readout, S save PNG");
+            + "B background (drawn/photo/black), H readout, S save PNG");
         sim.loop();
     }
 
@@ -287,7 +294,23 @@ public final class TeleSim extends JPanel {
         g.setColor(Color.BLACK);
         g.fillRect(0, 0, SW, SH);
         BufferedImage bg = photo[view];
-        if (showPhoto && bg != null) {
+        if (bgMode == 0) {
+            int rpm = layout.has[TeleLayout.CH_RPM] ? layout.val[TeleLayout.CH_RPM] / 1000 : 0;
+            int mph;
+            if (layout.has[TeleLayout.CH_SPEED]) {
+                mph = (int) Math.round(layout.val[TeleLayout.CH_SPEED] / 1000.0 * 0.621371);
+            } else if (demo && layout.has[TeleLayout.CH_GEAR]) {
+                mph = rpm * (layout.val[TeleLayout.CH_GEAR] / 1000) / 260; // demo has no speed
+            } else {
+                mph = 0;
+            }
+            if (view == TeleLayout.VIEW_LARGE) {
+                Chrome.classic(g, rpm, mph);
+            } else {
+                Chrome.sport(g, rpm, mph);
+            }
+            g.setClip(visible(view));
+        } else if (bgMode == 1 && bg != null) {
             g.drawImage(bg, 0, 0, SW, bg.getHeight() * SW / bg.getWidth(), null);
             g.setClip(visible(view));
         }
@@ -423,10 +446,10 @@ public final class TeleSim extends JPanel {
         g.setFont(new Font("Monospaced", Font.PLAIN, 13));
         String data = demo ? "demo " + DATA_HZ[dataHzI] + " Hz" : "live udp " + TeleLink.info();
         g.drawString(String.format("%s | %s strip | glide %s | tick %d Hz, drawn %.1f/s, layout %.2f ms, draw %.1f ms, "
-                + "%d slots | %s", view == 0 ? "Classic" : "Sport", painted ? "painted" : "pieces",
-            glide ? "on" : "off", TICK_HZ[tickHzI], fps, buildMs, drawMs, slots, data), 8, fh + 16);
+                + "%d slots | %s | %s", view == 0 ? "Classic" : "Sport", painted ? "painted" : "pieces",
+            glide ? "on" : "off", TICK_HZ[tickHzI], fps, buildMs, drawMs, slots, BG_NAMES[bgMode], data), 8, fh + 16);
         g.setColor(Color.GRAY);
-        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B photo  H readout  S save PNG",
+        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B background  H readout  S save PNG",
             8, fh + 33);
         g.setStroke(new BasicStroke(1));
     }
@@ -452,7 +475,7 @@ public final class TeleSim extends JPanel {
                 tickHzI = (tickHzI + 1) % TICK_HZ.length;
                 break;
             case KeyEvent.VK_B:
-                showPhoto = !showPhoto;
+                bgMode = (bgMode + 1) % BG_NAMES.length;
                 break;
             case KeyEvent.VK_H:
                 hud = !hud;

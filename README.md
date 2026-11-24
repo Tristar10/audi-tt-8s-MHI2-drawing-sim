@@ -3,7 +3,9 @@
 A live PC simulator of the OpenHaldex autocross view that tt-zoom draws on the TT 8S virtual
 cockpit (MIB2 MU1462). It runs the head unit's own layout code (`TeleLayout`, `TeleIcons`,
 `TeleStrip`) and its UDP receiver (`TeleLink`), and draws the layout's slots in a window at the
-head unit's tick rate, over photos of the cockpit.
+head unit's tick rate, inside the stock cockpit drawn clean (rev counter and speedometer with
+needles that follow the data, tab bar, bottom bar; in Sport the big rev counter and the on-board
+computer card). The phone photos of the car are still there behind the B key.
 
 The source of truth for `src/` is the altscreen repository, branch `telemetry`
 (`ports/tt-8s-mu1462/hmi/src/local/tt`). `sh sync.sh [path]` copies those files, the photos and the
@@ -24,7 +26,7 @@ sh run.sh --live          # listen for OpenHaldex or tools/gauge-send.py
 ```
 
 Options: `--sport` (Sport view), `--pieces` (the tele7 rev strip instead of the painted one),
-`--glide`, `--hz 15|20|30|60` (tick rate, default 30 like the car), `--scale 0.9` (window size),
+`--glide`, `--photo` (start with the phone photo), `--hz 15|20|30|60` (tick rate, default 30 like the car), `--scale 0.9` (window size),
 `--key N` (link key), `--shot SECONDS FILE.png` (save one frame and quit).
 
 Keys in the window:
@@ -37,7 +39,7 @@ Keys in the window:
 | G | Glide: move smoothly between data samples (one sample of delay) instead of jumping |
 | R | Demo data rate 10 / 20 / 50 Hz (OpenHaldex sends about 20 Hz) |
 | F | Tick rate 15 / 20 / 30 / 60 Hz |
-| B | Cockpit photo on / off |
+| B | Background: stock cockpit drawn clean / phone photo / black |
 | H | Readout on / off (tick rate, frames drawn, layout and draw time, link) |
 | S | Save the frame as `sim-<time>.png` |
 

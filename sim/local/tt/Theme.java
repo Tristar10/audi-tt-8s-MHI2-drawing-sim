@@ -89,6 +89,73 @@ final class Theme {
         return out;
     }
 
+    /**
+     * Sketch sheet: the background alone, and again with the layout's zones dashed (where it stays
+     * faint) and the empty pockets lettered (where characters could go).
+     *   java -cp out local.tt.Theme OUT.png
+     */
+    public static void main(String[] a) throws Exception {
+        BufferedImage bg = paint();
+        BufferedImage sheet = new BufferedImage(W, 2 * H + 60, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = sheet.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
+        g.setColor(new Color(0x15181C));
+        g.fillRect(0, 0, W, sheet.getHeight());
+        g.setColor(Color.WHITE);
+        g.setFont(new Font(Chrome.FAMILY, Font.BOLD, 22));
+        g.drawString("1  Background alone", 14, 22);
+        g.drawImage(bg, 0, 30, null);
+        g.drawString("2  Layout zones (dashed, background kept faint) and empty pockets A-E (characters)", 14, H + 52);
+        g.drawImage(bg, 0, H + 60, null);
+        g.translate(0, H + 60);
+        g.setStroke(new BasicStroke(1.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER, 10f, new float[] {8f, 6f}, 0f));
+        g.setColor(new Color(255, 255, 255, 170));
+        int[] sx = TeleLayout.TP_X;
+        int[] sy = TeleLayout.TP_Y;
+        Path2D.Double strip = new Path2D.Double();
+        strip.moveTo(sx[0], sy[0] - TeleLayout.HALF_MIN);
+        strip.lineTo(sx[1], sy[1] - TeleLayout.HALF_MAX);
+        strip.lineTo(sx[2], sy[2] - TeleLayout.HALF_MAX);
+        strip.lineTo(sx[3], sy[3] - TeleLayout.HALF_MIN);
+        strip.lineTo(sx[3], sy[3] + TeleLayout.HALF_MIN);
+        strip.lineTo(sx[2], sy[2] + TeleLayout.HALF_MAX);
+        strip.lineTo(sx[1], sy[1] + TeleLayout.HALF_MAX);
+        strip.lineTo(sx[0], sy[0] + TeleLayout.HALF_MIN);
+        strip.closePath();
+        g.draw(strip);
+        g.draw(new Rectangle2D.Double(325, 100, 732, 30)); // shift lights
+        g.draw(new Rectangle2D.Double(330, 226, 760, 196)); // values, notch, boost, temperatures
+        g.draw(new Ellipse2D.Double(62, 258, 256, 256)); // stock rev counter
+        g.draw(new Ellipse2D.Double(1092, 255, 256, 256)); // stock speedometer
+        g.draw(new Rectangle2D.Double(428, 40, 560, 54)); // stock tab bar
+        g.draw(new Rectangle2D.Double(0, 464, W, 76)); // stock bottom bar
+        g.setFont(new Font(Chrome.FAMILY, Font.PLAIN, 15));
+        g.drawString("rev strip", 600, 176);
+        g.drawString("shift lights", 340, 96);
+        g.drawString("values / gear / boost / temps", 340, 418);
+        g.drawString("stock dial", 150, 254);
+        g.drawString("stock dial", 1180, 251);
+        g.drawString("stock tab bar", 436, 36);
+        g.drawString("stock bottom bar", 600, 480);
+        String[] lab = {"A", "B", "C", "D", "E"};
+        double[][] at = {{40, 120, 200, 110}, {1120, 120, 200, 90}, {320, 425, 260, 40}, {860, 425, 230, 40},
+            {0, 290, 60, 150}};
+        String[] what = {"preset pocket", "Haldex pocket", "low band left", "low band right", "edge"};
+        for (int i = 0; i < lab.length; i++) {
+            g.setColor(new Color(0x2FD4FF));
+            g.draw(new Rectangle2D.Double(at[i][0], at[i][1], at[i][2], at[i][3]));
+            g.setFont(new Font(Chrome.FAMILY, Font.BOLD, 20));
+            g.drawString(lab[i], (float) at[i][0] + 6, (float) at[i][1] + 22);
+            g.setFont(new Font(Chrome.FAMILY, Font.PLAIN, 14));
+            g.drawString(what[i], (float) at[i][0] + 26, (float) at[i][1] + 20);
+        }
+        g.dispose();
+        javax.imageio.ImageIO.write(sheet, "png", new java.io.File(a[0]));
+        javax.imageio.ImageIO.write(bg, "png", new java.io.File(a[0].replace(".png", "-bg.png")));
+        System.out.println("wrote " + a[0]);
+    }
+
     /** 0.12 behind the gauges (strip, notch, value rows), up to 1 in the pockets and edges. */
     private static double mask(int x, int y) {
         double dx = Math.max(0, Math.max(330 - x, x - 1090)) / 90.0;

@@ -226,6 +226,7 @@ public final class TeleSim extends JPanel {
             long t0 = System.nanoTime();
             inputs(now);
             layout.paintedStrip = painted;
+            layout.themed = theme;
             layout.build(view, TeleLayout.PAGE_LIVE);
             long t1 = System.nanoTime();
             synchronized (frame) {

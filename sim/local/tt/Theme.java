@@ -102,6 +102,7 @@ final class Theme {
             portraitsOn(out);
         }
         housings(out);
+        chibis(out);
         return out;
     }
 
@@ -205,41 +206,56 @@ final class Theme {
             g.setStroke(new BasicStroke(1.4f));
             g.draw(sh);
         }
-        // faint inside of the value panel (user 2026-11-24): rings around the gear, fine diagonal
-        // hatching, a cobalt glow along the inside edges. Kept well under the text.
+        // The panel's decoration (user 2026-11-24, no artwork): embossed crosses, cells with
+        // hairlines, corner ticks and small tabs, rings behind the gear (the notch is see-through
+        // when themed), a pink line on the left and a cyan one on the right for the two characters,
+        // a glass reflection on top and dots fading in from the bottom corners.
         Shape oldClip = g.getClip();
         g.setClip(panel);
-        // the user's second illustration (skins/panel.jpg) inside the panel, dimmed like the first
-        // portraits: the two faces under the rpm side, glass shards and blue across the rest
-        BufferedImage pan = null;
-        try {
-            pan = javax.imageio.ImageIO.read(new java.io.File("skins", "panel.jpg"));
-        } catch (Exception e) {
-            pan = null;
+        // 1 embossed crosses: a light edge above, a dark edge below, no fill
+        for (int row = 0, y = 196; y < 450; y += 44, row++) {
+            for (int x = 300 + (row % 2) * 44; x < 1120; x += 88) {
+                Path2D.Double pl = plus(x, y, 12);
+                g.setStroke(new BasicStroke(1.2f));
+                g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+                g.setColor(Color.WHITE);
+                g.draw(java.awt.geom.AffineTransform.getTranslateInstance(-1, -1).createTransformedShape(pl));
+                g.setComposite(AlphaComposite.SrcOver.derive(0.45f));
+                g.setColor(Color.BLACK);
+                g.draw(java.awt.geom.AffineTransform.getTranslateInstance(1, 1).createTransformedShape(pl));
+            }
         }
-        if (pan != null) {
-            java.awt.Rectangle pb = panel.getBounds();
-            for (int Y = pb.y; Y < pb.y + pb.height; Y++) {
-                for (int X = pb.x; X < pb.x + pb.width; X++) {
-                    if (!panel.contains(X + 0.5, Y + 0.5)) {
-                        continue;
-                    }
-                    int c = sample(pan, 680 + (X + 0.5 - 470) / 0.5, 650 + (Y + 0.5 - 330) / 0.5);
-                    // dim, a little desaturated, darker towards the panel's edges
-                    int cr = (c >> 16) & 0xFF;
-                    int cg = (c >> 8) & 0xFF;
-                    int cb = c & 0xFF;
-                    double l = 0.3 * cr + 0.59 * cg + 0.11 * cb;
-                    double ex = (X - 710) / 400.0;
-                    double ey = (Y - 323) / 120.0;
-                    double v = 0.36 * (1 - 0.35 * Math.min(1, ex * ex + ey * ey));
-                    cr = (int) ((cr * 0.8 + l * 0.2) * v);
-                    cg = (int) ((cg * 0.8 + l * 0.2) * v);
-                    cb = (int) ((cb * 0.8 + l * 0.2) * v);
-                    img.setRGB(X, Y, over(img.getRGB(X, Y), (cr << 16) | (cg << 8) | cb, 0.92));
+        // 3 rings behind the gear, stronger inside the notch
+        Path2D.Double notch = path(596, 226, 844, 226, 814, 350, 626, 350);
+        for (int r = 30, k = 0; r < 330; r += 18, k++) {
+            g.setComposite(AlphaComposite.SrcOver.derive(k % 4 == 0 ? 0.14f : 0.07f));
+            g.setColor(CYAN);
+            g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
+            g.draw(new Ellipse2D.Double(720 - r, 288 - r, 2 * r, 2 * r));
+        }
+        g.setComposite(AlphaComposite.SrcOver.derive(0.18f));
+        g.setPaint(new RadialGradientPaint(720f, 288f, 150f, new float[] {0f, 1f},
+            new Color[] {new Color(0x1E46E0), new Color(0x1E46E0, true)}));
+        g.fill(notch);
+        // 5 dots fading in from the bottom corners
+        g.setColor(CYAN);
+        for (int y = 222; y < 432; y += 8) {
+            for (int x = 326; x < 1096; x += 8) {
+                double d = Math.min(Math.hypot(x - 322, y - 430), Math.hypot(x - 1098, y - 430));
+                double r = 1.6 * (1 - d / 220);
+                if (r > 0.3) {
+                    g.setComposite(AlphaComposite.SrcOver.derive(0.16f));
+                    g.fill(new Ellipse2D.Double(x - r, y - r, 2 * r, 2 * r));
                 }
             }
         }
+        // 5 glass reflection along the top, soft shadow along the bottom
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setPaint(new java.awt.GradientPaint(0, 216, new Color(255, 255, 255, 26), 0, 246, new Color(255, 255, 255, 0)));
+        g.fill(new Rectangle2D.Double(300, 216, 820, 30));
+        g.setPaint(new java.awt.GradientPaint(0, 400, new Color(0, 0, 0, 0), 0, 432, new Color(0, 0, 0, 90)));
+        g.fill(new Rectangle2D.Double(300, 400, 820, 32));
+        // inner cobalt glow along the edges
         for (int i = 0; i < 4; i++) {
             g.setComposite(AlphaComposite.SrcOver.derive(0.06f));
             g.setColor(COBALT);
@@ -247,6 +263,28 @@ final class Theme {
             g.draw(panel);
         }
         g.setClip(oldClip);
+        // 2 cells: a hairline over the temperature rail, corner ticks, small tabs
+        g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
+        g.setColor(new Color(0x3E8BFF));
+        g.setStroke(new BasicStroke(1f));
+        g.draw(new java.awt.geom.Line2D.Double(338, 378, 1090, 378));
+        g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
+        g.setColor(CYAN);
+        g.setStroke(new BasicStroke(1.6f));
+        double[][] ticks = {{334, 230, 1, 1}, {590, 230, -1, 1}, {334, 374, 1, -1}, {590, 374, -1, -1},
+            {850, 230, 1, 1}, {1092, 230, -1, 1}, {850, 374, 1, -1}, {1092, 374, -1, -1}};
+        for (double[] t : ticks) {
+            g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
+        }
+        tab(g, "DRIVER", 584, 356, false);
+        tab(g, "TURBO", 856, 356, true);
+        // 4 the two characters' colours along the panel's sides
+        g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
+        g.setStroke(new BasicStroke(2.4f));
+        g.setColor(new Color(0xFF5FA8));
+        g.draw(line(322, 262, 322, 428));
+        g.setColor(CYAN);
+        g.draw(line(1098, 228, 1098, 394));
         g.setComposite(AlphaComposite.SrcOver);
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
@@ -535,6 +573,36 @@ final class Theme {
         int g = (int) (((a >> 8) & 0xFF) * (1 - t) + ((b >> 8) & 0xFF) * t);
         int bb = (int) ((a & 0xFF) * (1 - t) + (b & 0xFF) * t);
         return (r << 16) | (g << 8) | bb;
+    }
+
+    /** Two chibi stickers standing on the rev strip's top corners, outside the shift-light rail. */
+    private static void chibis(BufferedImage out) {
+        Graphics2D g = out.createGraphics();
+        BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 104, new Color(0xFF5FA8), 14);
+        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 100, new Color(0x2FD4FF), 14);
+        if (pink != null) {
+            g.drawImage(pink, 354 - pink.getWidth() / 2, 132 - pink.getHeight() + 14, null);
+        }
+        if (white != null) {
+            g.drawImage(white, 1112 - white.getWidth() / 2, 138 - white.getHeight() + 14, null);
+        }
+        g.dispose();
+    }
+
+    /** A small sticker-style label: caps in a hairline box, right- or left-anchored at (x, baseline). */
+    private static void tab(Graphics2D g, String t, double x, double y, boolean leftAnchor) {
+        Font f = new Font(Chrome.FAMILY, Font.BOLD, 11);
+        g.setFont(f);
+        int w = g.getFontMetrics().stringWidth(t) + 10;
+        double x0 = leftAnchor ? x : x - w;
+        g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
+        g.setColor(new Color(0x3E8BFF));
+        g.setStroke(new BasicStroke(1f));
+        g.draw(new Rectangle2D.Double(x0, y - 11, w, 15));
+        g.setComposite(AlphaComposite.SrcOver.derive(0.7f));
+        g.setColor(new Color(0x9FC4FF));
+        g.drawString(t, (float) x0 + 5, (float) y);
+        g.setComposite(AlphaComposite.SrcOver);
     }
 
     /** The rev strip's outline grown by pad: its segments as quads plus round corners. */

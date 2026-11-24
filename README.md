@@ -40,6 +40,8 @@ Keys in the window:
 | R | Demo data rate 10 / 20 / 50 Hz (OpenHaldex sends about 20 Hz) |
 | F | Tick rate 15 / 20 / 30 / 60 Hz |
 | B | Background: stock cockpit drawn clean / phone photo / black |
+| T | Itasha theme on / off (`--theme`; `--portraits colour` or `tint` adds the large portraits) |
+| O | Haldex control pop-up; then Up/Down, Enter (edit / send), Backspace (cancel / close) |
 | H | Readout on / off (tick rate, frames drawn, layout and draw time, link) |
 | S | Save the frame as `sim-<time>.png` |
 
@@ -50,6 +52,20 @@ and where it goes on the car's screen; the pictures stay out of the repository, 
 `skins/README.md`), **drawn** (the cockpit drawn by `Chrome.java`, used when a view has no skin),
 **phone photo**, **black**. `skins/classic.skin` takes the dials, tab bar and bottom bar from the
 owner's manual's 620 x 272 cockpit screenshot; `skins/sport.skin` the big rev counter, status rows, navigation panel and bottom bar from the manual's "Sport view (TTS)" figure, with its numbered marker painted over (`patch`).
+
+## Theme, pop-up, tools
+
+- **Theme**: drawn by `Theme.java` from the livery's motifs, with your pictures from `skins/`
+  (`art.jpg` for the portraits, `chibi-*.jpg` for the chibis; see `skins/README.md`). Export the
+  car's background pictures: `java -cp out local.tt.Theme --export DIR colour` writes
+  `theme-classic.rgba` and `theme-sport.rgba` (copy to the car's /tmp, then
+  `sh tt.sh tele theme install` and `sh tt.sh tele theme on`).
+- **Fixed values and scripted keys** for renders: `--set rpm=6600 --set boost=110 ...`,
+  `--ui open,down,press`, `--shot 2 out.png`.
+- **Glide** (`G` or `--glide`) uses the head unit's own `TeleGlide`.
+- `java -cp out local.tt.LinkBench [seed]`: the real receiver against the board's port-sweep
+  contract (CarPlay holding ports, restarts, every port taken, board reboot).
+- `java -cp out local.tt.ArtCost`: slots and picture pixels per view.
 
 ## Live data
 

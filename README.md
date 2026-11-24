@@ -21,8 +21,8 @@ sh run.sh --live          # listen for OpenHaldex or tools/gauge-send.py
 ```
 
 ```powershell
-.\run.ps1                 # Windows
-.\run.ps1 --live
+.\run.cmd                 # Windows (or double-click run.cmd; works when scripts are disabled)
+.\run.cmd --live
 ```
 
 Options: `--sport` (Sport view), `--pieces` (the tele7 rev strip instead of the painted one),

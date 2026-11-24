@@ -2,3 +2,4 @@
 *.java text eol=lf
 *.py text eol=lf
 *.jpg binary
+*.cmd text eol=crlf

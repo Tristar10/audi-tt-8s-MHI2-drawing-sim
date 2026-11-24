@@ -49,7 +49,7 @@ B cycles: **skin** (pieces of a real cockpit picture, layered: `skins/*.skin` sa
 and where it goes on the car's screen; the pictures stay out of the repository, see
 `skins/README.md`), **drawn** (the cockpit drawn by `Chrome.java`, used when a view has no skin),
 **phone photo**, **black**. `skins/classic.skin` takes the dials, tab bar and bottom bar from the
-owner's manual's 620 x 272 cockpit screenshot.
+owner's manual's 620 x 272 cockpit screenshot; `skins/sport.skin` the big rev counter, status rows, navigation panel and bottom bar from the manual's "Sport view (TTS)" figure, with its numbered marker painted over (`patch`).
 
 ## Live data
 

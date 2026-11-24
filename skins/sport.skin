@@ -1,0 +1,17 @@
+# Sport (small view) background from the owner's manual's "Sport view (TTS)" figure (1021 x 507).
+# The big rev counter (centre 509,302, radius about 162 there) goes on the car's (791,288), radius
+# 290: scale 1.8125. The status rows and bottom-bar items are cut between the manual's numbered
+# markers and moved to where the car shows them. Save the figure as skins/sport.png.
+image sport.png
+# the figure's bars and panels sit on dark grey: pull it to black
+black 34
+# marker 2's line over the top ticks: copy the ticks one step to the left over it
+patch 503 134 11 38 -8 0
+#      src x y w h          dest x y w h          shape feather
+layer  347 140 324 324      497 -6 587 587        circle 8
+layer  182 136 160 28       198 24 290 51         rect 10
+layer  652 135 200 30       1050 8 362 54         rect 10
+layer  735 212 145 158      1201 125 263 286      rect 14
+layer  168 417 100 30       173 486 181 54        rect 10
+layer  378 417 262 30       554 486 475 54        rect 10
+layer  747 419 118 28       1222 487 214 51       rect 10

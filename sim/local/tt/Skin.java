@@ -21,6 +21,9 @@ import javax.imageio.ImageIO;
  *
  * skins/classic.skin, skins/sport.skin, one instruction per line:
  *   image FILE                                    picture, relative to the .skin file
+ *   black N                                       levels below N become black (default 18)
+ *   patch X Y W H DX DY                           paint over a box with the picture DX, DY away
+ *                                                 (hides a manual's callout marker)
  *   layer SX SY SW SH  DX DY DW DH  circle|rect FEATHER
  */
 final class Skin {
@@ -38,6 +41,7 @@ final class Skin {
         try {
             Skin s = new Skin();
             BufferedImage src = null;
+            int blackAt = 18;
             BufferedReader r = new BufferedReader(new FileReader(spec));
             try {
                 for (String l = r.readLine(); l != null; l = r.readLine()) {
@@ -46,13 +50,26 @@ final class Skin {
                         continue;
                     }
                     if (w[0].equals("image")) {
-                        src = ImageIO.read(new File(spec.getParentFile(), w[1]));
+                        BufferedImage in = ImageIO.read(new File(spec.getParentFile(), w[1]));
+                        src = new BufferedImage(in.getWidth(), in.getHeight(), BufferedImage.TYPE_INT_RGB);
+                        src.getGraphics().drawImage(in, 0, 0, null);
+                    } else if (w[0].equals("black")) {
+                        blackAt = Integer.parseInt(w[1]);
+                    } else if (w[0].equals("patch") && src != null) {
+                        int x0 = Integer.parseInt(w[1]);
+                        int y0 = Integer.parseInt(w[2]);
+                        int pw = Integer.parseInt(w[3]);
+                        int ph = Integer.parseInt(w[4]);
+                        int dx = Integer.parseInt(w[5]);
+                        int dy = Integer.parseInt(w[6]);
+                        int[] from = src.getRGB(x0 + dx, y0 + dy, pw, ph, null, 0, pw);
+                        src.setRGB(x0, y0, pw, ph, from, 0, pw);
                     } else if (w[0].equals("layer") && src != null) {
                         int[] v = new int[8];
                         for (int i = 0; i < 8; i++) {
                             v[i] = Integer.parseInt(w[1 + i]);
                         }
-                        s.pics.add(piece(src, v, w[9].equals("circle"), Float.parseFloat(w[10])));
+                        s.pics.add(piece(src, v, w[9].equals("circle"), Float.parseFloat(w[10]), blackAt));
                         s.at.add(new int[] {v[4], v[5]});
                     }
                 }
@@ -74,17 +91,17 @@ final class Skin {
     }
 
     /** Pulls the picture's near-black (its dark grey background) down to the black around it. */
-    private static int black(int rgb) {
+    private static int black(int rgb, int at) {
         int o = 0;
         for (int sh = 0; sh <= 16; sh += 8) {
             int c = (rgb >> sh) & 0xFF;
-            c = Math.max(0, (c - 18) * 255 / (255 - 18));
+            c = Math.max(0, (c - at) * 255 / (255 - at));
             o |= c << sh;
         }
         return o;
     }
 
-    private static BufferedImage piece(BufferedImage src, int[] v, boolean circle, float feather) {
+    private static BufferedImage piece(BufferedImage src, int[] v, boolean circle, float feather, int blackAt) {
         int dw = v[6];
         int dh = v[7];
         BufferedImage big = new BufferedImage(dw, dh, BufferedImage.TYPE_INT_RGB);
@@ -110,7 +127,7 @@ final class Skin {
                     in = Math.min(Math.min(x + 0.5, dw - x - 0.5), Math.min(y + 0.5, dh - y - 0.5));
                 }
                 double a = Math.max(0, Math.min(1, in / feather));
-                out.setRGB(x, y, ((int) Math.round(a * 255) << 24) | black(sharp.getRGB(x, y)));
+                out.setRGB(x, y, ((int) Math.round(a * 255) << 24) | black(sharp.getRGB(x, y), blackAt));
             }
         }
         return out;

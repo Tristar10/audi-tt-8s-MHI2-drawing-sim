@@ -182,7 +182,7 @@ final class Theme {
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Area strip = stripShape(12);
-        Path2D.Double panel = path(340, 216, 1098, 216, 1098, 412, 1080, 430, 322, 430, 322, 234);
+        Path2D.Double panel = path(350, 216, 1108, 216, 1108, 412, 1090, 430, 332, 430, 332, 234); // centred on 720
         Area rail = new Area(new Rectangle2D.Double(720 - 338, 96, 676, 36));
         for (Shape sh : new Shape[] {strip, panel, rail}) {
             // drop shadow: the shape a few times, offset down, faint
@@ -267,12 +267,12 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
         g.setColor(new Color(0x3E8BFF));
         g.setStroke(new BasicStroke(1f));
-        g.draw(new java.awt.geom.Line2D.Double(338, 378, 1090, 378));
+        g.draw(new java.awt.geom.Line2D.Double(348, 378, 1100, 378));
         g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(1.6f));
-        double[][] ticks = {{334, 230, 1, 1}, {590, 230, -1, 1}, {334, 374, 1, -1}, {590, 374, -1, -1},
-            {850, 230, 1, 1}, {1092, 230, -1, 1}, {850, 374, 1, -1}, {1092, 374, -1, -1}};
+        double[][] ticks = {{344, 230, 1, 1}, {590, 230, -1, 1}, {344, 374, 1, -1}, {590, 374, -1, -1},
+            {850, 230, 1, 1}, {1102, 230, -1, 1}, {850, 374, 1, -1}, {1102, 374, -1, -1}};
         for (double[] t : ticks) {
             g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
         }
@@ -282,18 +282,18 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(322, 262, 322, 428));
+        g.draw(line(332, 262, 332, 428));
         g.setColor(CYAN);
-        g.draw(line(1098, 228, 1098, 394));
+        g.draw(line(1108, 228, 1108, 394));
         g.setComposite(AlphaComposite.SrcOver);
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(322, 252, 322, 234, 340, 216, 360, 216));
-        g.draw(line(1060, 430, 1080, 430, 1098, 412, 1098, 392));
+        g.draw(line(332, 252, 332, 234, 350, 216, 370, 216));
+        g.draw(line(1070, 430, 1090, 430, 1108, 412, 1108, 392));
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 344, 220, 30, 6, 3, 0.55f);
+        checker(g, 354, 220, 30, 6, 3, 0.55f);
         // the strip's corner marks: small cyan ticks where its slopes meet the middle
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(2f));

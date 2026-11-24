@@ -248,11 +248,11 @@ final class Theme {
             eyePanel(out, art, 1365, 405, 1490, 505, 130, 2, 60, 330, 110, 160); // white-haired, right slope
             return;
         }
-        // Centred on the eyes (user 2026-11-24): art point between the eyes -> screen point, scale,
-        // and a wide, short fade so the eyes carry it and the mouth falls outside.
-        // pink: her eyes run diagonally (she lies sideways), so centred on the big one
-        eyesPortrait(out, art, 935, 755, 0.78, 128, 142, 128, 92);    // pink, left pocket
-        eyesPortrait(out, art, 1422, 448, 0.92, 1350, 132, 128, 74);  // white-haired, right pocket
+        // The first portraits' look (user: "good already"), zoomed out a little, each centred on
+        // the point between the eyes; pink turned clockwise to follow the rising slope.
+        // art eye centre, scale, turn (deg, clockwise), screen centre, fade oval w h
+        turnedPortrait(out, art, 967, 685, 0.40, 22, 142, 132, 320, 380);   // pink, left
+        turnedPortrait(out, art, 1427, 452, 0.42, 0, 1335, 132, 300, 370);  // white-haired, right
     }
 
     /**
@@ -331,6 +331,47 @@ final class Theme {
         g.draw(new java.awt.geom.Line2D.Double(px0 + ux * (s0 + 20) + nx * o0, py0 + uy * (s0 + 20) + ny * o0,
             px0 + ux * (s0 + 60) + nx * o0, py0 + uy * (s0 + 60) + ny * o0));
         g.dispose();
+    }
+
+    private static void turnedPortrait(BufferedImage out, BufferedImage art, double ecx, double ecy, double sc,
+                                       double turn, double dcx, double dcy, double mw, double mh) {
+        double t = Math.toRadians(turn);
+        double cs = Math.cos(t);
+        double sn = Math.sin(t);
+        int x0 = (int) Math.max(0, dcx - mw / 2);
+        int x1 = (int) Math.min(W, dcx + mw / 2);
+        int y0 = (int) Math.max(0, dcy - mh / 2);
+        int y1 = (int) Math.min(H, dcy + mh / 2);
+        for (int Y = y0; Y < y1; Y++) {
+            for (int X = x0; X < x1; X++) {
+                double qx = X + 0.5 - dcx;
+                double qy = Y + 0.5 - dcy;
+                double ex = qx / (mw / 2);
+                double ey = qy / (mh / 2);
+                double r = Math.sqrt(ex * ex + ey * ey);
+                double a = 1 - smooth((r - 0.55) / 0.45);
+                a *= smooth(Math.max(Math.max(330 - X, X - 1090), Math.max(118 - Y, Y - 425)) / 60.0 + 0.0001);
+                if (a <= 0) {
+                    continue;
+                }
+                // undo the turn, then the scale: screen offset -> art
+                double ux = (qx * cs + qy * sn) / sc;
+                double uy = (-qx * sn + qy * cs) / sc;
+                int c = sample(art, ecx + ux, ecy + uy);
+                int cr = (c >> 16) & 0xFF;
+                int cg = (c >> 8) & 0xFF;
+                int cb = c & 0xFF;
+                int col;
+                if (portraits == 1) {
+                    col = ramp((0.3 * cr + 0.59 * cg + 0.11 * cb) / 255.0);
+                    a *= 0.75;
+                } else {
+                    col = (int) (cr * 0.5) << 16 | (int) (cg * 0.5) << 8 | (int) (cb * 0.5);
+                    a *= 0.85;
+                }
+                out.setRGB(X, Y, over(out.getRGB(X, Y), col, a));
+            }
+        }
     }
 
     private static void eyesPortrait(BufferedImage out, BufferedImage art, double ecx, double ecy, double sc,

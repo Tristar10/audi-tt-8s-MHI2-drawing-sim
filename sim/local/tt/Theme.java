@@ -694,6 +694,11 @@ final class Theme {
         if (doll != null) {
             g.drawImage(doll, 462 - doll.getWidth() / 2, 456 - doll.getHeight() + 12, null);
         }
+        // the white-haired chibi in the frame's top-right corner, right of the shift lights
+        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 92, new Color(0x2FD4FF), 12);
+        if (white != null) {
+            g.drawImage(white, 468 - white.getWidth() / 2, 176 - white.getHeight() + 12, null);
+        }
         g.dispose();
     }
 

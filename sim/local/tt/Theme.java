@@ -37,9 +37,23 @@ final class Theme {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         g.setRenderingHint(RenderingHints.KEY_TEXT_ANTIALIASING, RenderingHints.VALUE_TEXT_ANTIALIAS_ON);
 
-        // hazard stripes: a band along the bottom (like the door sills) and one in the top-right
-        stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
-        stripes(g, path(1080, 108, 1440, 108, 1440, 230), COBALT, 0.45f);
+        // wrap panels (user's print layout): faceted blue crosses on the lower corners and the
+        // top-right pocket, chevrons along the sill line, fender arches around the stock dials
+        // (they sit where the wheels would), a checker strip
+        BufferedImage fac = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D f = fac.createGraphics();
+        f.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        facets(f, new Rectangle2D.Double(0, 0, W, H), 1f);
+        f.dispose();
+        fadeFromCorners(fac);
+        g.drawImage(fac, 0, 0, null);
+        chevrons(g, 0, 434, W, 26, COBALT, 0.75f);
+        arch(g, 190, 386, 150, 22, WHITE, 0.16f);
+        arch(g, 190, 386, 172, 6, CYAN, 0.35f);
+        arch(g, 1220, 383, 150, 22, WHITE, 0.16f);
+        arch(g, 1220, 383, 172, 6, CYAN, 0.35f);
+        checker(g, 336, 448, 220, 12, 6, 0.30f);
+        checker(g, 864, 448, 220, 12, 6, 0.30f);
         // target rings (the livery's circle motif), behind the left pocket and lower right
         rings(g, 140, 150, 40, 210, 16, CYAN, 0.30f);
         rings(g, 1330, 430, 30, 170, 14, CYAN, 0.22f);
@@ -59,14 +73,6 @@ final class Theme {
             float a = 0.25f + rnd.nextFloat() * 0.35f;
             cross(g, x, y, s, rnd.nextInt(3) == 0 ? WHITE : CYAN, a);
         }
-        // race number, outlined, in the lower right gap
-        g.setFont(new Font(Chrome.FAMILY, Font.BOLD, 150).deriveFont(Font.BOLD | Font.ITALIC));
-        Shape n = g.getFont().createGlyphVector(g.getFontRenderContext(), "87")
-            .getOutline(1120f, 520f);
-        g.setComposite(AlphaComposite.SrcOver.derive(0.30f));
-        g.setColor(COBALT);
-        g.setStroke(new BasicStroke(2.2f));
-        g.draw(n);
         g.dispose();
 
         // base and mask
@@ -169,6 +175,93 @@ final class Theme {
         int gg = (int) Math.round(((dst >> 8) & 0xFF) * (1 - a) + ((src >> 8) & 0xFF) * a);
         int bb = (int) Math.round((dst & 0xFF) * (1 - a) + (src & 0xFF) * a);
         return (r << 16) | (gg << 8) | bb;
+    }
+
+    /** Extruded "+" blocks on a staggered grid: face, darker sides, a light top edge. */
+    private static void facets(Graphics2D g, Shape clip, float a) {
+        Shape old = g.getClip();
+        g.setClip(clip);
+        Rectangle2D r = clip.getBounds2D();
+        double u = 20; // arm width
+        double d = 12; // extrusion
+        Random shade = new Random(141);
+        g.setComposite(AlphaComposite.SrcOver.derive(a));
+        int row = 0;
+        for (double y = r.getMinY() - 3 * u; y < r.getMaxY() + 3 * u; y += 3.2 * u, row++) {
+            for (double x = r.getMinX() - 3 * u + (row % 2) * 3.2 * u; x < r.getMaxX() + 3 * u; x += 6.4 * u) {
+                if (shade.nextInt(5) == 0) {
+                    continue; // gaps, like the wrap's loose blocks
+                }
+                g.setComposite(AlphaComposite.SrcOver.derive(a * (0.45f + 0.55f * shade.nextFloat())));
+                Path2D.Double plus = plus(x, y, u);
+                g.setColor(new Color(0x06134F));
+                g.fill(java.awt.geom.AffineTransform.getTranslateInstance(d, d).createTransformedShape(plus));
+                g.setColor(new Color(0x0B2BA8));
+                g.fill(java.awt.geom.AffineTransform.getTranslateInstance(d / 2, d / 2).createTransformedShape(plus));
+                g.setColor(new Color(0x1E46E0));
+                g.fill(plus);
+                g.setColor(new Color(0x5C86FF));
+                g.setStroke(new BasicStroke(1.4f));
+                g.draw(plus);
+            }
+        }
+        g.setClip(old);
+        g.setComposite(AlphaComposite.SrcOver);
+    }
+
+    /** Keeps the blocks only towards three corners (bottom left, bottom right, top right), soft. */
+    private static void fadeFromCorners(BufferedImage img) {
+        double[][] c = {{0, H, 380}, {W, H, 400}, {W, 108, 300}};
+        int[] px = img.getRGB(0, 0, W, H, null, 0, W);
+        for (int y = 0; y < H; y++) {
+            for (int x = 0; x < W; x++) {
+                double k = 0;
+                for (double[] cc : c) {
+                    double t = Math.min(1, Math.hypot(x - cc[0], y - cc[1]) / cc[2]);
+                    k = Math.max(k, 1 - t * t * (3 - 2 * t));
+                }
+                int i = y * W + x;
+                int a = (int) Math.round((px[i] >>> 24) * k);
+                px[i] = (a << 24) | (px[i] & 0xFFFFFF);
+            }
+        }
+        img.setRGB(0, 0, W, H, px, 0, W);
+    }
+
+    private static Path2D.Double plus(double x, double y, double u) {
+        return path(x + u, y, x + 2 * u, y, x + 2 * u, y + u, x + 3 * u, y + u, x + 3 * u, y + 2 * u, x + 2 * u,
+            y + 2 * u, x + 2 * u, y + 3 * u, x + u, y + 3 * u, x + u, y + 2 * u, x, y + 2 * u, x, y + u, x + u, y + u);
+    }
+
+    private static void chevrons(Graphics2D g, double x0, double y, double w, double h, Color c, float a) {
+        g.setComposite(AlphaComposite.SrcOver.derive(a));
+        g.setColor(c);
+        for (double x = x0; x < x0 + w; x += 30) {
+            g.fill(path(x, y, x + 10, y, x + 10 + h / 2, y + h / 2, x + 10, y + h, x, y + h, x + h / 2, y + h / 2));
+        }
+        g.setComposite(AlphaComposite.SrcOver);
+    }
+
+    /** Upper half ring around a dial, like a fender arch. */
+    private static void arch(Graphics2D g, double cx, double cy, double r, float w, Color c, float a) {
+        g.setComposite(AlphaComposite.SrcOver.derive(a));
+        g.setColor(c);
+        g.setStroke(new BasicStroke(w, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
+        g.draw(new java.awt.geom.Arc2D.Double(cx - r, cy - r, 2 * r, 2 * r, 10, 160, java.awt.geom.Arc2D.OPEN));
+        g.setComposite(AlphaComposite.SrcOver);
+    }
+
+    private static void checker(Graphics2D g, double x0, double y0, double w, double h, double s, float a) {
+        g.setComposite(AlphaComposite.SrcOver.derive(a));
+        g.setColor(WHITE);
+        for (int i = 0; i * s < w; i++) {
+            for (int j = 0; j * s < h; j++) {
+                if ((i + j) % 2 == 0) {
+                    g.fill(new Rectangle2D.Double(x0 + i * s, y0 + j * s, s, s));
+                }
+            }
+        }
+        g.setComposite(AlphaComposite.SrcOver);
     }
 
     private static void stripes(Graphics2D g, Shape clip, Color c, float a) {

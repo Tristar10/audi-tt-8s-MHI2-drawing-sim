@@ -74,7 +74,7 @@ public final class TeleSim extends JPanel {
     private volatile boolean savePng;
     /** Itasha theme: the livery pattern (Theme) instead of our layer's black background. */
     private volatile boolean theme;
-    private BufferedImage themeImg;
+    private final BufferedImage[] themeImg = new BufferedImage[2];
     private long shotAt = -1;
     /** --set overrides: channel -> value (x1000), applied after demo or live values. */
     private final Map<Integer, Integer> fixed = new HashMap<Integer, Integer>();
@@ -375,10 +375,10 @@ public final class TeleSim extends JPanel {
             g.setColor(new Color((c >>> 24) & 0xFF, (c >>> 16) & 0xFF, (c >>> 8) & 0xFF, c & 0xFF));
             int k = layout.kind[i];
             if (theme && i == 0 && k == TeleLayout.BOX && layout.w[i] == SW && layout.h[i] == SH) {
-                if (themeImg == null) {
-                    themeImg = Theme.paint();
+                if (themeImg[view] == null) {
+                    themeImg[view] = Theme.paint(view);
                 }
-                g.drawImage(themeImg, 0, 0, null);
+                g.drawImage(themeImg[view], 0, 0, null);
             } else if (k == TeleLayout.STRIP) {
                 strip(g, i);
             } else if (k == TeleLayout.BOX && layout.rot[i] != 0) {

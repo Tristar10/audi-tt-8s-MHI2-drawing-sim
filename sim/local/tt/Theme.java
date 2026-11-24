@@ -36,6 +36,11 @@ final class Theme {
     static int portraits = 0;
 
     static BufferedImage paint() {
+        return paint(TeleLayout.VIEW_LARGE);
+    }
+
+    /** The theme for Classic (VIEW_LARGE) or Sport (VIEW_SMALL). */
+    static BufferedImage paint(int view) {
         BufferedImage pat = new BufferedImage(W, H, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = pat.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -93,11 +98,15 @@ final class Theme {
         for (int y = 0; y < H; y++) {
             for (int x = 0; x < W; x++) {
                 int i = y * W + x;
-                double a = ((p[i] >>> 24) / 255.0) * mask(x, y) * 0.55; // keep it all dim
+                double a = ((p[i] >>> 24) / 255.0) * mask(view, x, y) * 0.55; // keep it all dim
                 base[i] = over(base[i], p[i], a);
             }
         }
         out.setRGB(0, 0, W, H, base, 0, W);
+        if (view == TeleLayout.VIEW_SMALL) {
+            sport(out);
+            return out;
+        }
         if (portraits > 0) {
             portraitsOn(out);
         }
@@ -605,6 +614,83 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver);
     }
 
+    /**
+     * Sport (the map area left of the big rev counter, user 2026-11-24): one glass housing around
+     * the panel's content with the Classic panel's decoration (embossed crosses, rings behind the
+     * gear, pink and cyan side lines, corner brackets, glass light), and the doll chibi in the gap
+     * between the panel and the rev counter.
+     */
+    private static void sport(BufferedImage img) {
+        Graphics2D g = img.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        Path2D.Double panel = path(40, 104, 430, 104, 450, 124, 450, 432, 60, 432, 40, 412);
+        for (int k = 1; k <= 6; k++) {
+            g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+            g.setColor(Color.BLACK);
+            g.fill(java.awt.geom.AffineTransform.getTranslateInstance(0, k * 1.5).createTransformedShape(panel));
+        }
+        for (float w : new float[] {16f, 10f, 5f}) {
+            g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+            g.setColor(COBALT);
+            g.setStroke(new BasicStroke(w, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.draw(panel);
+        }
+        g.setComposite(AlphaComposite.SrcOver.derive(0.92f));
+        g.setPaint(new java.awt.GradientPaint(0, 100, new Color(0x0A1230), 0, 440, new Color(0x03050C)));
+        g.fill(panel);
+        Shape oldClip = g.getClip();
+        g.setClip(panel);
+        for (int row = 0, y = 90; y < 450; y += 44, row++) {
+            for (int x = 20 + (row % 2) * 44; x < 470; x += 88) {
+                Path2D.Double pl = plus(x, y, 12);
+                g.setStroke(new BasicStroke(1.2f));
+                g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+                g.setColor(Color.WHITE);
+                g.draw(java.awt.geom.AffineTransform.getTranslateInstance(-1, -1).createTransformedShape(pl));
+                g.setComposite(AlphaComposite.SrcOver.derive(0.45f));
+                g.setColor(Color.BLACK);
+                g.draw(java.awt.geom.AffineTransform.getTranslateInstance(1, 1).createTransformedShape(pl));
+            }
+        }
+        for (int r = 24, k = 0; r < 220; r += 16, k++) {
+            g.setComposite(AlphaComposite.SrcOver.derive(k % 4 == 0 ? 0.14f : 0.07f));
+            g.setColor(CYAN);
+            g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
+            g.draw(new Ellipse2D.Double(128 - r, 235 - r, 2 * r, 2 * r));
+        }
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setPaint(new java.awt.GradientPaint(0, 104, new Color(255, 255, 255, 26), 0, 134, new Color(255, 255, 255, 0)));
+        g.fill(new Rectangle2D.Double(30, 104, 430, 30));
+        for (int i = 0; i < 4; i++) {
+            g.setComposite(AlphaComposite.SrcOver.derive(0.06f));
+            g.setColor(COBALT);
+            g.setStroke(new BasicStroke(10 + i * 10));
+            g.draw(panel);
+        }
+        g.setClip(oldClip);
+        g.setComposite(AlphaComposite.SrcOver.derive(0.75f));
+        g.setColor(new Color(0x3E8BFF));
+        g.setStroke(new BasicStroke(1.4f));
+        g.draw(panel);
+        g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
+        g.setColor(CYAN);
+        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(line(410, 104, 430, 104, 450, 124, 450, 144));
+        g.draw(line(40, 392, 40, 412, 60, 432, 80, 432));
+        g.setStroke(new BasicStroke(2.4f));
+        g.setColor(new Color(0xFF5FA8));
+        g.draw(line(40, 130, 40, 300));
+        g.setColor(CYAN);
+        g.draw(line(450, 260, 450, 420));
+        g.setComposite(AlphaComposite.SrcOver);
+        checker(g, 60, 108, 30, 6, 3, 0.55f);
+        BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 88, new Color(0xFF5FA8), 12);
+        if (doll != null) {
+            g.drawImage(doll, 484 - doll.getWidth() / 2, 452 - doll.getHeight() + 12, null);
+        }
+        g.dispose();
+    }
+
     /** The rev strip's outline grown by pad: its segments as quads plus round corners. */
     private static Area stripShape(double pad) {
         Area a = new Area();
@@ -628,9 +714,10 @@ final class Theme {
     }
 
     /** 0.12 behind the gauges (strip, notch, value rows), up to 1 in the pockets and edges. */
-    private static double mask(int x, int y) {
-        double dx = Math.max(0, Math.max(330 - x, x - 1090)) / 90.0;
-        double dy = Math.max(0, Math.max(118 - y, y - 425)) / 40.0;
+    private static double mask(int view, int x, int y) {
+        boolean sp = view == TeleLayout.VIEW_SMALL;
+        double dx = Math.max(0, Math.max((sp ? 40 : 330) - x, x - (sp ? 450 : 1090))) / 90.0;
+        double dy = Math.max(0, Math.max((sp ? 100 : 118) - y, y - (sp ? 432 : 425))) / 40.0;
         double d = Math.min(1, Math.hypot(dx, dy));
         return 0.12 + 0.88 * d * d * (3 - 2 * d);
     }

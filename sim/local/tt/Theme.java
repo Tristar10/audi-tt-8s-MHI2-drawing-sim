@@ -662,7 +662,7 @@ final class Theme {
             g.setComposite(AlphaComposite.SrcOver.derive(k % 4 == 0 ? 0.14f : 0.07f));
             g.setColor(CYAN);
             g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
-            g.draw(new Ellipse2D.Double(112 - r, 259 - r, 2 * r, 2 * r));
+            g.draw(new Ellipse2D.Double(112 - r, 267 - r, 2 * r, 2 * r));
         }
         g.setComposite(AlphaComposite.SrcOver);
         g.setPaint(new java.awt.GradientPaint(0, 104, new Color(255, 255, 255, 26), 0, 134, new Color(255, 255, 255, 0)));
@@ -697,7 +697,7 @@ final class Theme {
         // the white-haired chibi in the frame's top-right corner, right of the shift lights
         BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 92, new Color(0x2FD4FF), 12);
         if (white != null) {
-            g.drawImage(white, 468 - white.getWidth() / 2, 192 - white.getHeight() + 12, null);
+            g.drawImage(white, 468 - white.getWidth() / 2, 202 - white.getHeight() + 12, null);
         }
         g.dispose();
     }

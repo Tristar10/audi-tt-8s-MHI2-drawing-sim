@@ -71,7 +71,18 @@ public final class TeleSim extends JPanel {
     private volatile int dataHzI = 1;
     private volatile int tickHzI = 2;
     private volatile boolean savePng;
+    /** Itasha theme: the livery pattern (Theme) instead of our layer's black background. */
+    private volatile boolean theme;
+    private BufferedImage themeImg;
     private long shotAt = -1;
+    /** --set overrides: channel -> value (x1000), applied after demo or live values. */
+    private final Map<Integer, Integer> fixed = new HashMap<Integer, Integer>();
+    private static final String[] SET_NAMES = {"rpm", "speed", "pedal", "coolant", "oil", "iat", "boost", "brake",
+        "hxt", "hxa", "gear", "dsg", "clutch", "preset"};
+    private static final int[] SET_CH = {TeleLayout.CH_RPM, TeleLayout.CH_SPEED, TeleLayout.CH_PEDAL,
+        TeleLayout.CH_COOLANT, TeleLayout.CH_OIL, TeleLayout.CH_IAT, TeleLayout.CH_BOOST, TeleLayout.CH_BRAKE,
+        TeleLayout.CH_HX_TARGET, TeleLayout.CH_HX_ACTUAL, TeleLayout.CH_GEAR, TeleLayout.CH_DSG,
+        TeleLayout.CH_CLUTCH, TeleLayout.CH_PRESET};
     private String shotFile;
 
     // demo sampling and glide
@@ -125,6 +136,8 @@ public final class TeleSim extends JPanel {
         boolean pieces = false;
         boolean glide = false;
         boolean bgPhoto = false;
+        boolean themeOn = false;
+        java.util.List<String> sets = new java.util.ArrayList<String>();
         for (int i = 0; i < a.length; i++) {
             if (a[i].equals("--live")) {
                 demo = false;
@@ -140,6 +153,10 @@ public final class TeleSim extends JPanel {
                 view = TeleLayout.VIEW_SMALL;
             } else if (a[i].equals("--pieces")) {
                 pieces = true;
+            } else if (a[i].equals("--set")) {
+                sets.add(a[++i]);
+            } else if (a[i].equals("--theme")) {
+                themeOn = true;
             } else if (a[i].equals("--photo")) {
                 bgPhoto = true;
             } else if (a[i].equals("--glide")) {
@@ -149,7 +166,7 @@ public final class TeleSim extends JPanel {
                 shotFile = a[++i];
             } else {
                 System.out.println("usage: TeleSim [--live] [--key N] [--hz 15|20|30|60] [--scale 0.9] [--photos dir]"
-                    + " [--sport] [--pieces] [--glide] [--photo] [--shot SECONDS FILE.png]");
+                    + " [--sport] [--pieces] [--glide] [--photo] [--theme] [--set NAME=VALUE]... [--shot SECONDS FILE.png]");
                 return;
             }
         }
@@ -158,6 +175,21 @@ public final class TeleSim extends JPanel {
         sim.painted = !pieces;
         sim.glide = glide;
         sim.bgMode = bgPhoto ? 2 : 0;
+        sim.theme = themeOn;
+        for (String kv : sets) {
+            String[] p = kv.split("=");
+            int ch = -1;
+            for (int k = 0; k < SET_NAMES.length; k++) {
+                if (SET_NAMES[k].equals(p[0])) {
+                    ch = SET_CH[k];
+                }
+            }
+            if (ch < 0 || p.length != 2) {
+                System.out.println("--set NAME=VALUE, names: " + String.join(" ", SET_NAMES) + " (boost in kPa)");
+                return;
+            }
+            sim.fixed.put(ch, (int) Math.round(Double.parseDouble(p[1]) * 1000));
+        }
         sim.shotAt = shotAfter < 0 ? -1 : System.currentTimeMillis() + (long) (shotAfter * 1000);
         sim.shotFile = shotFile;
         final double sc = scale;
@@ -174,7 +206,7 @@ public final class TeleSim extends JPanel {
             }
         });
         System.out.println("keys: V view, P painted strip, D demo/live, G glide, R demo data rate, F tick rate, "
-            + "B background (skin/drawn/photo/black), H readout, S save PNG");
+            + "B background (skin/drawn/photo/black), T theme, H readout, S save PNG");
         sim.loop();
     }
 
@@ -277,6 +309,10 @@ public final class TeleSim extends JPanel {
                 lastRaw[ch] = layout.val[ch];
             }
         }
+        for (Map.Entry<Integer, Integer> e : fixed.entrySet()) {
+            layout.val[e.getKey()] = e.getValue();
+            layout.has[e.getKey()] = true;
+        }
         if (glide && prevAt > 0 && curAt > prevAt) {
             // one sample late: move from the previous sample to the newest over one sample period
             double f = Math.min(1.0, (now - curAt) / (double) (curAt - prevAt));
@@ -334,7 +370,12 @@ public final class TeleSim extends JPanel {
             }
             g.setColor(new Color((c >>> 24) & 0xFF, (c >>> 16) & 0xFF, (c >>> 8) & 0xFF, c & 0xFF));
             int k = layout.kind[i];
-            if (k == TeleLayout.STRIP) {
+            if (theme && i == 0 && k == TeleLayout.BOX && layout.w[i] == SW && layout.h[i] == SH) {
+                if (themeImg == null) {
+                    themeImg = Theme.paint();
+                }
+                g.drawImage(themeImg, 0, 0, null);
+            } else if (k == TeleLayout.STRIP) {
                 strip(g, i);
             } else if (k == TeleLayout.BOX && layout.rot[i] != 0) {
                 g.fillRect(layout.x[i], layout.y[i] - layout.h[i] / 2, layout.w[i], layout.h[i]);
@@ -458,7 +499,7 @@ public final class TeleSim extends JPanel {
                 + "%d slots | %s | %s", view == 0 ? "Classic" : "Sport", painted ? "painted" : "pieces",
             glide ? "on" : "off", TICK_HZ[tickHzI], fps, buildMs, drawMs, slots, BG_NAMES[bgMode], data), 8, fh + 16);
         g.setColor(Color.GRAY);
-        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B background  H readout  S save PNG",
+        g.drawString("V view  P strip  D demo/live  G glide  R data rate  F tick rate  B background  T theme  H readout  S save PNG",
             8, fh + 33);
         g.setStroke(new BasicStroke(1));
     }
@@ -485,6 +526,9 @@ public final class TeleSim extends JPanel {
                 break;
             case KeyEvent.VK_B:
                 bgMode = (bgMode + 1) % BG_NAMES.length;
+                break;
+            case KeyEvent.VK_T:
+                theme = !theme;
                 break;
             case KeyEvent.VK_H:
                 hud = !hud;

@@ -623,7 +623,13 @@ final class Theme {
     private static void sport(BufferedImage img) {
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-        Path2D.Double panel = path(40, 104, 430, 104, 450, 124, 450, 432, 60, 432, 40, 412);
+        // the panel traces the part of the screen the cluster lets through (TeleLayout.SP_X/SP_Y)
+        Path2D.Double panel = new Path2D.Double();
+        panel.moveTo(TeleLayout.SP_X[0], TeleLayout.SP_Y[0]);
+        for (int k = 1; k < TeleLayout.SP_X.length; k++) {
+            panel.lineTo(TeleLayout.SP_X[k], TeleLayout.SP_Y[k]);
+        }
+        panel.closePath();
         for (int k = 1; k <= 6; k++) {
             g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
             g.setColor(Color.BLACK);
@@ -656,11 +662,11 @@ final class Theme {
             g.setComposite(AlphaComposite.SrcOver.derive(k % 4 == 0 ? 0.14f : 0.07f));
             g.setColor(CYAN);
             g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
-            g.draw(new Ellipse2D.Double(128 - r, 235 - r, 2 * r, 2 * r));
+            g.draw(new Ellipse2D.Double(112 - r, 243 - r, 2 * r, 2 * r));
         }
         g.setComposite(AlphaComposite.SrcOver);
         g.setPaint(new java.awt.GradientPaint(0, 104, new Color(255, 255, 255, 26), 0, 134, new Color(255, 255, 255, 0)));
-        g.fill(new Rectangle2D.Double(30, 104, 430, 30));
+        g.fill(new Rectangle2D.Double(0, 74, 520, 30));
         for (int i = 0; i < 4; i++) {
             g.setComposite(AlphaComposite.SrcOver.derive(0.06f));
             g.setColor(COBALT);
@@ -675,18 +681,18 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(410, 104, 430, 104, 450, 124, 450, 144));
-        g.draw(line(40, 392, 40, 412, 60, 432, 80, 432));
+        g.draw(line(164, 79, 184, 74, 212, 74));
+        g.draw(line(8, 430, 8, 460, 40, 460));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(40, 130, 40, 300));
+        g.draw(line(8, 160, 8, 330));
         g.setColor(CYAN);
-        g.draw(line(450, 260, 450, 420));
+        g.draw(line(512, 82, 512, 176));
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 60, 108, 30, 6, 3, 0.55f);
+        checker(g, 22, 112, 30, 6, 3, 0.55f);
         BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 88, new Color(0xFF5FA8), 12);
         if (doll != null) {
-            g.drawImage(doll, 484 - doll.getWidth() / 2, 452 - doll.getHeight() + 12, null);
+            g.drawImage(doll, 462 - doll.getWidth() / 2, 456 - doll.getHeight() + 12, null);
         }
         g.dispose();
     }

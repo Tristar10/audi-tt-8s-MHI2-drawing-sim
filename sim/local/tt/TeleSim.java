@@ -62,6 +62,8 @@ public final class TeleSim extends JPanel {
     private BufferedImage stripLitRed;
     /** --noshadow: the layout without its text, bar and icon shadows (before/after renders). */
     static boolean noShadow;
+    /** --testdata: show the board's test-pattern tag. */
+    static boolean testDataFlag;
     /** L key: launch off / armed / ready (fixed brake, throttle, speed and lock). */
     private int launchStep;
     private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true), Theme.notchGlow(),
@@ -174,6 +176,8 @@ public final class TeleSim extends JPanel {
                 themeOn = true;
             } else if (a[i].equals("--portraits")) {
                 Theme.portraits = a[++i].equals("eyes") ? 3 : a[i].equals("colour") ? 2 : a[i].equals("tint") ? 1 : 0;
+            } else if (a[i].equals("--testdata")) {
+                testDataFlag = true;
             } else if (a[i].equals("--noshadow")) {
                 noShadow = true;
                 TeleIcons.shadows = false;
@@ -250,6 +254,8 @@ public final class TeleSim extends JPanel {
             layout.carArt = carPic[0] != null && carPic[1] != null;
             layout.glowArt = true;
             layout.shadows = !noShadow;
+            if (testDataFlag)
+                layout.testData = true; // --testdata: as if the board's flags bit 0 were set
             layout.chibiArt = carPic[3] != null && carPic[4] != null;
             layout.bloomArt = carPic[5] != null && carPic[6] != null && carPic[7] != null;
             layout.build(view, ui.page());

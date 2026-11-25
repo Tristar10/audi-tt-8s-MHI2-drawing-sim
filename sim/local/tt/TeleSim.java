@@ -60,6 +60,8 @@ public final class TeleSim extends JPanel {
     private BufferedImage stripTrack;
     private BufferedImage stripLit;
     private BufferedImage stripLitRed;
+    /** --noshadow: the layout without its text, bar and icon shadows (before/after renders). */
+    static boolean noShadow;
     private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true), Theme.notchGlow(),
         Theme.sportChibi(true), Theme.sportChibi(false), Theme.sportBloom(), Theme.sportEmblem(),
         Theme.sportBloomHot()};
@@ -170,6 +172,9 @@ public final class TeleSim extends JPanel {
                 themeOn = true;
             } else if (a[i].equals("--portraits")) {
                 Theme.portraits = a[++i].equals("eyes") ? 3 : a[i].equals("colour") ? 2 : a[i].equals("tint") ? 1 : 0;
+            } else if (a[i].equals("--noshadow")) {
+                noShadow = true;
+                TeleIcons.shadows = false;
             } else if (a[i].equals("--black")) {
                 bgBlack = true;
             } else if (a[i].equals("--photo")) {
@@ -242,6 +247,7 @@ public final class TeleSim extends JPanel {
             layout.themed = theme;
             layout.carArt = carPic[0] != null && carPic[1] != null;
             layout.glowArt = true;
+            layout.shadows = !noShadow;
             layout.chibiArt = carPic[3] != null && carPic[4] != null;
             layout.bloomArt = carPic[5] != null && carPic[6] != null && carPic[7] != null;
             layout.build(view, ui.page());

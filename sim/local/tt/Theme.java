@@ -771,9 +771,10 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
-        // the Sport chibis (2026-11-25)
-        for (int k = 0; k < 2; k++) {
-            BufferedImage c = sportChibi(k == 0);
+        // the Sport chibis, bloom and emblem (2026-11-25)
+        String[] spn = {"sp-chibi-white", "sp-chibi-doll", "sp-bloom", "sp-emblem"};
+        for (int k = 0; k < 4; k++) {
+            BufferedImage c = k < 2 ? sportChibi(k == 0) : k == 2 ? sportBloom() : sportEmblem();
             if (c == null) {
                 continue;
             }
@@ -785,7 +786,7 @@ final class Theme {
                 b[4 * i + 2] = (byte) px[i];
                 b[4 * i + 3] = (byte) (px[i] >>> 24);
             }
-            java.io.File f = new java.io.File(dir, k == 0 ? "sp-chibi-white.rgba" : "sp-chibi-doll.rgba");
+            java.io.File f = new java.io.File(dir, spn[k] + ".rgba");
             java.io.FileOutputStream o = new java.io.FileOutputStream(f);
             o.write(b);
             o.close();
@@ -827,6 +828,59 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+    }
+
+    /**
+     * Sport's rpm bloom (2026-11-25, after the Viper's tach): a soft deep-red disc, SP_BLOOM_S
+     * square, hot in the middle and fading out; the layout scales it with rpm.
+     */
+    static BufferedImage sportBloom() {
+        int n = TeleLayout.SP_BLOOM_S;
+        BufferedImage im = new BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = im.createGraphics();
+        g.setPaint(new RadialGradientPaint(n / 2f, n / 2f, n / 2f, new float[] {0f, 0.35f, 0.7f, 1f},
+            new Color[] {new Color(235, 52, 58, 225), new Color(196, 24, 44, 175), new Color(120, 8, 34, 80),
+                new Color(60, 0, 20, 0)}));
+        g.fillRect(0, 0, n, n);
+        g.dispose();
+        return im;
+    }
+
+    /**
+     * The emblem the bloom reveals: the user's line art (skins/emblem.png) as dark wine lines,
+     * SP_EMBLEM_S square, soft at the edges. Nearly invisible on the navy panel, dark strokes on the
+     * red bloom, as the Viper's snake on its tach.
+     */
+    static BufferedImage sportEmblem() {
+        BufferedImage src;
+        try {
+            src = javax.imageio.ImageIO.read(new java.io.File("skins", "emblem.png"));
+        } catch (Exception e) {
+            return null;
+        }
+        if (src == null) {
+            return null;
+        }
+        int n = TeleLayout.SP_EMBLEM_S;
+        BufferedImage sc = new BufferedImage(n, n, BufferedImage.TYPE_INT_RGB);
+        Graphics2D g = sc.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BICUBIC);
+        g.setRenderingHint(RenderingHints.KEY_RENDERING, RenderingHints.VALUE_RENDER_QUALITY);
+        g.drawImage(src, 0, 0, n, n, null);
+        g.dispose();
+        BufferedImage im = new BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB);
+        for (int y = 0; y < n; y++) {
+            for (int x = 0; x < n; x++) {
+                int c = sc.getRGB(x, y);
+                double rg = (((c >> 16) & 0xFF) + ((c >> 8) & 0xFF)) / 510.0;
+                double ink = Math.max(0, Math.min(1, (1 - rg) * 1.9));
+                double d = Math.hypot(x - n / 2.0, y - n / 2.0) / (n / 2.0);
+                double fade = 1 - smooth((d - 0.62) / 0.38);
+                int a = (int) Math.round(255 * 0.85 * ink * fade);
+                im.setRGB(x, y, (a << 24) | (40 << 16) | (2 << 8) | 14);
+            }
+        }
+        return im;
     }
 
     /**

@@ -61,7 +61,7 @@ public final class TeleSim extends JPanel {
     private BufferedImage stripLit;
     private BufferedImage stripLitRed;
     private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true), Theme.notchGlow(),
-        Theme.sportChibi(true), Theme.sportChibi(false)};
+        Theme.sportChibi(true), Theme.sportChibi(false), Theme.sportBloom(), Theme.sportEmblem()};
 
     private volatile int view = TeleLayout.VIEW_LARGE;
     private volatile boolean painted = true;
@@ -242,6 +242,7 @@ public final class TeleSim extends JPanel {
             layout.carArt = carPic[0] != null && carPic[1] != null;
             layout.glowArt = true;
             layout.chibiArt = carPic[3] != null && carPic[4] != null;
+            layout.bloomArt = carPic[5] != null && carPic[6] != null;
             layout.build(view, ui.page());
             long t1 = System.nanoTime();
             synchronized (frame) {
@@ -385,7 +386,7 @@ public final class TeleSim extends JPanel {
                 }
                 g.drawImage(themeImg[view], 0, 0, null);
             } else if (k == TeleLayout.IMAGE) {
-                g.drawImage(carPic[layout.size[i]], layout.x[i], layout.y[i], null);
+                g.drawImage(carPic[layout.size[i]], layout.x[i], layout.y[i], layout.w[i], layout.h[i], null);
             } else if (k == TeleLayout.STRIP) {
                 strip(g, i);
             } else if (k == TeleLayout.BOX && layout.rot[i] != 0) {

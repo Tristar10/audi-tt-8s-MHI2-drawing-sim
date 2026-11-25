@@ -59,10 +59,6 @@ final class Theme {
         // the slanted parallelogram stripes of the first sketch along the sill line (user preferred
         // them to chevrons)
         stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
-        arch(g, 235, 389, 138, 22, WHITE, 0.16f);
-        arch(g, 235, 389, 160, 6, CYAN, 0.35f);
-        arch(g, 1205, 389, 138, 22, WHITE, 0.16f);
-        arch(g, 1205, 389, 160, 6, CYAN, 0.35f);
         checker(g, 336, 448, 220, 12, 6, 0.30f);
         checker(g, 864, 448, 220, 12, 6, 0.30f);
         // target rings (the livery's circle motif), behind the left pocket and lower right
@@ -111,6 +107,16 @@ final class Theme {
             portraitsOn(out);
         }
         housings(out);
+        if (view == TeleLayout.VIEW_LARGE) {
+            // fender arches tight around the stock dials (measured: 235 / 1205, y 389, r 116)
+            Graphics2D ga = out.createGraphics();
+            ga.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+            arch(ga, 235, 389, 124, 6, WHITE, 0.30f);
+            arch(ga, 235, 389, 131, 3, CYAN, 0.70f);
+            arch(ga, 1205, 389, 124, 6, WHITE, 0.30f);
+            arch(ga, 1205, 389, 131, 3, CYAN, 0.70f);
+            ga.dispose();
+        }
         chibis(out);
         return out;
     }
@@ -593,10 +599,10 @@ final class Theme {
         BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 104, new Color(0xFF5FA8), 14);
         BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 100, new Color(0x2FD4FF), 14);
         if (pink != null) {
-            g.drawImage(pink, 354 - pink.getWidth() / 2, 132 - pink.getHeight() + 14, null);
+            g.drawImage(pink, 334 - pink.getWidth() / 2, 122 - pink.getHeight() + 14, null); // clear of the rail (tele24)
         }
         if (white != null) {
-            g.drawImage(white, 1112 - white.getWidth() / 2, 138 - white.getHeight() + 14, null);
+            g.drawImage(white, 1118 - white.getWidth() / 2, 124 - white.getHeight() + 14, null); // clear of the strip (tele24)
         }
         g.dispose();
     }

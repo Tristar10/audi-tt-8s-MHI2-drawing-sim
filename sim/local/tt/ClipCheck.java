@@ -46,7 +46,8 @@ public final class ClipCheck {
                                 Rectangle2D b = s.getBounds2D();
                                 if (b.getWidth() * b.getHeight() > 100000)
                                     continue; // backgrounds, tints
-                                if (t.kind[i] == TeleLayout.IMAGE && (t.size[i] == TeleLayout.SP_BLOOM || t.size[i] == TeleLayout.SP_EMBLEM))
+                                if (t.kind[i] == TeleLayout.IMAGE && (t.size[i] == TeleLayout.SP_BLOOM || t.size[i] == TeleLayout.SP_BLOOM_HOT
+                                    || t.size[i] == TeleLayout.SP_EMBLEM))
                                     continue; // Sport bloom and emblem: soft-edged, fade out before the edge
                                 if (t.rgba[i] == 0xFF3B3050 || t.rgba[i] == 0xFF3B3030
                                     || (view == 1 && t.kind[i] == TeleLayout.QUAD && t.rgba[i] == TeleLayout.RED && onOutline(t, i)))

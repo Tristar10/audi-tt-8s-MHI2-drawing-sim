@@ -772,9 +772,9 @@ final class Theme {
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
         // the Sport chibis, bloom and emblem (2026-11-25)
-        String[] spn = {"sp-chibi-white", "sp-chibi-doll", "sp-bloom", "sp-emblem"};
-        for (int k = 0; k < 4; k++) {
-            BufferedImage c = k < 2 ? sportChibi(k == 0) : k == 2 ? sportBloom() : sportEmblem();
+        String[] spn = {"sp-chibi-white", "sp-chibi-doll", "sp-bloom", "sp-emblem", "sp-bloom-hot"};
+        for (int k = 0; k < 5; k++) {
+            BufferedImage c = k < 2 ? sportChibi(k == 0) : k == 2 ? sportBloom() : k == 3 ? sportEmblem() : sportBloomHot();
             if (c == null) {
                 continue;
             }
@@ -839,8 +839,21 @@ final class Theme {
         BufferedImage im = new BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g = im.createGraphics();
         g.setPaint(new RadialGradientPaint(n / 2f, n / 2f, n / 2f, new float[] {0f, 0.35f, 0.7f, 1f},
-            new Color[] {new Color(235, 52, 58, 225), new Color(196, 24, 44, 175), new Color(120, 8, 34, 80),
-                new Color(60, 0, 20, 0)}));
+            new Color[] {new Color(128, 10, 26, 235), new Color(104, 6, 24, 200), new Color(70, 2, 20, 110),
+                new Color(40, 0, 14, 0)}));
+        g.fillRect(0, 0, n, n);
+        g.dispose();
+        return im;
+    }
+
+    /** The bright layer over the dark bloom (TeleLayout.SP_BLOOM_HOT): bright red, hot in the middle. */
+    static BufferedImage sportBloomHot() {
+        int n = TeleLayout.SP_BLOOM_S;
+        BufferedImage im = new BufferedImage(n, n, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = im.createGraphics();
+        g.setPaint(new RadialGradientPaint(n / 2f, n / 2f, n / 2f, new float[] {0f, 0.4f, 0.75f, 1f},
+            new Color[] {new Color(255, 70, 60, 230), new Color(236, 36, 46, 190), new Color(200, 20, 40, 90),
+                new Color(160, 10, 30, 0)}));
         g.fillRect(0, 0, n, n);
         g.dispose();
         return im;

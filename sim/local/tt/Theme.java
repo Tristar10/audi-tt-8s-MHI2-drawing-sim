@@ -106,17 +106,18 @@ final class Theme {
         if (portraits > 0) {
             portraitsOn(out);
         }
-        housings(out);
         if (view == TeleLayout.VIEW_LARGE) {
-            // fender arches tight around the stock dials (measured: 235 / 1205, y 389, r 116)
+            // fender arches tight around the stock dials (measured: 235 / 1205, y 389, r 116), only
+            // on their outer side, under the housings: nothing reaches into the middle panel
             Graphics2D ga = out.createGraphics();
             ga.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            arch(ga, 235, 389, 124, 6, WHITE, 0.30f);
-            arch(ga, 235, 389, 131, 3, CYAN, 0.70f);
-            arch(ga, 1205, 389, 124, 6, WHITE, 0.30f);
-            arch(ga, 1205, 389, 131, 3, CYAN, 0.70f);
+            arcSpan(ga, 235, 389, 124, 6, WHITE, 0.30f, 95, 110);
+            arcSpan(ga, 235, 389, 131, 3, CYAN, 0.70f, 95, 110);
+            arcSpan(ga, 1205, 389, 124, 6, WHITE, 0.30f, -25, 110);
+            arcSpan(ga, 1205, 389, 131, 3, CYAN, 0.70f, -25, 110);
             ga.dispose();
         }
+        housings(out);
         chibis(out);
         return out;
     }
@@ -201,7 +202,7 @@ final class Theme {
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Area strip = stripShape(12);
-        Path2D.Double panel = path(372, 216, 1086, 216, 1086, 412, 1068, 430, 354, 430, 354, 234); // centred on 720, clear of the dials
+        Path2D.Double panel = path(388, 216, 1070, 216, 1070, 412, 1052, 430, 370, 430, 370, 234); // centred on 720, a clear gap to the dials
         Area rail = new Area(new Rectangle2D.Double(720 - 338, 96, 676, 36));
         for (Shape sh : new Shape[] {strip, panel, rail}) {
             // drop shadow: the shape a few times, offset down, faint
@@ -286,12 +287,12 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
         g.setColor(new Color(0x3E8BFF));
         g.setStroke(new BasicStroke(1f));
-        g.draw(new java.awt.geom.Line2D.Double(370, 378, 1078, 378));
+        g.draw(new java.awt.geom.Line2D.Double(386, 378, 1062, 378));
         g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(1.6f));
-        double[][] ticks = {{366, 230, 1, 1}, {590, 230, -1, 1}, {366, 374, 1, -1}, {590, 374, -1, -1},
-            {850, 230, 1, 1}, {1080, 230, -1, 1}, {850, 374, 1, -1}, {1080, 374, -1, -1}};
+        double[][] ticks = {{382, 230, 1, 1}, {590, 230, -1, 1}, {382, 374, 1, -1}, {590, 374, -1, -1},
+            {850, 230, 1, 1}, {1064, 230, -1, 1}, {850, 374, 1, -1}, {1064, 374, -1, -1}};
         for (double[] t : ticks) {
             g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
         }
@@ -300,18 +301,18 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(354, 262, 354, 428));
+        g.draw(line(370, 262, 370, 428));
         g.setColor(CYAN);
-        g.draw(line(1086, 228, 1086, 394));
+        g.draw(line(1070, 228, 1070, 394));
         g.setComposite(AlphaComposite.SrcOver);
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(354, 252, 354, 234, 372, 216, 392, 216));
-        g.draw(line(1048, 430, 1068, 430, 1086, 412, 1086, 392));
+        g.draw(line(370, 252, 370, 234, 388, 216, 408, 216));
+        g.draw(line(1032, 430, 1052, 430, 1070, 412, 1070, 392));
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 376, 220, 30, 6, 3, 0.55f);
+        checker(g, 392, 220, 30, 6, 3, 0.55f);
         // the strip's corner marks: small cyan ticks where its slopes meet the middle
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(2f));
@@ -923,6 +924,16 @@ final class Theme {
         g.setColor(c);
         g.setStroke(new BasicStroke(w, BasicStroke.CAP_BUTT, BasicStroke.JOIN_ROUND));
         g.draw(new java.awt.geom.Arc2D.Double(cx - r, cy - r, 2 * r, 2 * r, 10, 160, java.awt.geom.Arc2D.OPEN));
+        g.setComposite(AlphaComposite.SrcOver);
+    }
+
+    /** An arc of radius r from angle start over extent degrees (counter-clockwise from the right). */
+    private static void arcSpan(Graphics2D g, double cx, double cy, double r, float w, Color c, float a, double start,
+                                double extent) {
+        g.setComposite(AlphaComposite.SrcOver.derive(a));
+        g.setColor(c);
+        g.setStroke(new BasicStroke(w, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+        g.draw(new java.awt.geom.Arc2D.Double(cx - r, cy - r, 2 * r, 2 * r, start, extent, java.awt.geom.Arc2D.OPEN));
         g.setComposite(AlphaComposite.SrcOver);
     }
 

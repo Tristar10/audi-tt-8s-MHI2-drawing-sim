@@ -39,7 +39,7 @@ Keys in the window:
 | G | Glide: move smoothly between data samples (one sample of delay) instead of jumping |
 | R | Demo data rate 10 / 20 / 50 Hz (OpenHaldex sends about 20 Hz) |
 | F | Tick rate 15 / 20 / 30 / 60 Hz |
-| B | Background: stock cockpit drawn clean / phone photo / black |
+| B | Background: stock cockpit drawn clean / phone photo / black (`--black` starts on black) |
 | T | Itasha theme on / off (`--theme`; `--portraits colour` or `tint` adds the large portraits) |
 | O | Haldex control pop-up; then Up/Down, Enter (edit / send), Backspace (cancel / close) |
 | H | Readout on / off (tick rate, frames drawn, layout and draw time, link) |

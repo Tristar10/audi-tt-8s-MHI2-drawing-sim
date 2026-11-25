@@ -140,6 +140,7 @@ public final class TeleSim extends JPanel {
         boolean pieces = false;
         boolean glide = false;
         boolean bgPhoto = false;
+        boolean bgBlack = false;
         boolean themeOn = false;
         java.util.List<String> sets = new java.util.ArrayList<String>();
         for (int i = 0; i < a.length; i++) {
@@ -167,6 +168,8 @@ public final class TeleSim extends JPanel {
                 themeOn = true;
             } else if (a[i].equals("--portraits")) {
                 Theme.portraits = a[++i].equals("eyes") ? 3 : a[i].equals("colour") ? 2 : a[i].equals("tint") ? 1 : 0;
+            } else if (a[i].equals("--black")) {
+                bgBlack = true;
             } else if (a[i].equals("--photo")) {
                 bgPhoto = true;
             } else if (a[i].equals("--glide")) {
@@ -184,7 +187,7 @@ public final class TeleSim extends JPanel {
         sim.view = view;
         sim.painted = !pieces;
         sim.glide = glide;
-        sim.bgMode = bgPhoto ? 2 : 0;
+        sim.bgMode = bgBlack ? 3 : bgPhoto ? 2 : 0;
         sim.theme = themeOn;
         for (String kv : sets) {
             String[] p = kv.split("=");

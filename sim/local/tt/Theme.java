@@ -59,10 +59,10 @@ final class Theme {
         // the slanted parallelogram stripes of the first sketch along the sill line (user preferred
         // them to chevrons)
         stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
-        arch(g, 205, 386, 150, 22, WHITE, 0.16f);
-        arch(g, 205, 386, 172, 6, CYAN, 0.35f);
-        arch(g, 1235, 386, 150, 22, WHITE, 0.16f);
-        arch(g, 1235, 386, 172, 6, CYAN, 0.35f);
+        arch(g, 235, 389, 138, 22, WHITE, 0.16f);
+        arch(g, 235, 389, 160, 6, CYAN, 0.35f);
+        arch(g, 1205, 389, 138, 22, WHITE, 0.16f);
+        arch(g, 1205, 389, 160, 6, CYAN, 0.35f);
         checker(g, 336, 448, 220, 12, 6, 0.30f);
         checker(g, 864, 448, 220, 12, 6, 0.30f);
         // target rings (the livery's circle motif), behind the left pocket and lower right
@@ -156,8 +156,8 @@ final class Theme {
         g.draw(strip);
         g.draw(new Rectangle2D.Double(325, 100, 732, 30)); // shift lights
         g.draw(new Rectangle2D.Double(330, 226, 760, 196)); // values, notch, boost, temperatures
-        g.draw(new Ellipse2D.Double(77, 258, 256, 256)); // stock rev counter
-        g.draw(new Ellipse2D.Double(1107, 258, 256, 256)); // stock speedometer
+        g.draw(new Ellipse2D.Double(119, 273, 232, 232)); // stock rev counter
+        g.draw(new Ellipse2D.Double(1089, 273, 232, 232)); // stock speedometer
         g.draw(new Rectangle2D.Double(440, 40, 560, 54)); // stock tab bar
         g.draw(new Rectangle2D.Double(0, 464, W, 76)); // stock bottom bar
         g.setFont(new Font(Chrome.FAMILY, Font.PLAIN, 15));
@@ -195,7 +195,7 @@ final class Theme {
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Area strip = stripShape(12);
-        Path2D.Double panel = path(350, 216, 1108, 216, 1108, 412, 1090, 430, 332, 430, 332, 234); // centred on 720
+        Path2D.Double panel = path(372, 216, 1086, 216, 1086, 412, 1068, 430, 354, 430, 354, 234); // centred on 720, clear of the dials
         Area rail = new Area(new Rectangle2D.Double(720 - 338, 96, 676, 36));
         for (Shape sh : new Shape[] {strip, panel, rail}) {
             // drop shadow: the shape a few times, offset down, faint
@@ -280,12 +280,12 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
         g.setColor(new Color(0x3E8BFF));
         g.setStroke(new BasicStroke(1f));
-        g.draw(new java.awt.geom.Line2D.Double(348, 378, 1100, 378));
+        g.draw(new java.awt.geom.Line2D.Double(370, 378, 1078, 378));
         g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(1.6f));
-        double[][] ticks = {{344, 230, 1, 1}, {590, 230, -1, 1}, {344, 374, 1, -1}, {590, 374, -1, -1},
-            {850, 230, 1, 1}, {1102, 230, -1, 1}, {850, 374, 1, -1}, {1102, 374, -1, -1}};
+        double[][] ticks = {{366, 230, 1, 1}, {590, 230, -1, 1}, {366, 374, 1, -1}, {590, 374, -1, -1},
+            {850, 230, 1, 1}, {1080, 230, -1, 1}, {850, 374, 1, -1}, {1080, 374, -1, -1}};
         for (double[] t : ticks) {
             g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
         }
@@ -294,18 +294,18 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(332, 262, 332, 428));
+        g.draw(line(354, 262, 354, 428));
         g.setColor(CYAN);
-        g.draw(line(1108, 228, 1108, 394));
+        g.draw(line(1086, 228, 1086, 394));
         g.setComposite(AlphaComposite.SrcOver);
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(332, 252, 332, 234, 350, 216, 370, 216));
-        g.draw(line(1070, 430, 1090, 430, 1108, 412, 1108, 392));
+        g.draw(line(354, 252, 354, 234, 372, 216, 392, 216));
+        g.draw(line(1048, 430, 1068, 430, 1086, 412, 1086, 392));
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 354, 220, 30, 6, 3, 0.55f);
+        checker(g, 376, 220, 30, 6, 3, 0.55f);
         // the strip's corner marks: small cyan ticks where its slopes meet the middle
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(2f));

@@ -1,11 +1,12 @@
 # Classic (map tab) background from a screenshot of the stock cockpit (620 x 272, the owner's
 # manual's "Connection manager" page). Dials are placed on the car's dial positions
-# (rev counter centre 205,386, speedometer 1235,386, radius 128: symmetric about the screen centre
+# (rev counter centre 235,389, speedometer 1205,389, radius 116: measured on a car photo with our own
+# elements as the ruler, 2026-11-24; before: 205/1235 r 128, then 190/1220; symmetric about the screen centre
 # x 720, 2026-11-24; the first estimate from phone photos was 190/1220), the bars on the tab bar and
 # bottom bar areas. The picture itself is not in the repository: save it as skins/classic.png.
 image classic.png
 #      src x y w h          dest x y w h          shape feather
-layer  18 136 116 116       77 258 256 256        circle 7
-layer  490 136 116 116      1107 258 256 256      circle 7
+layer  18 136 116 116       119 273 232 232       circle 7
+layer  490 136 116 116      1089 273 232 232      circle 7
 layer  185 22 260 28        436 37 568 61         rect 10
 layer  195 222 225 34       596 463 491 74        rect 10

@@ -656,8 +656,8 @@ final class Theme {
         g.fill(panel);
         Shape oldClip = g.getClip();
         g.setClip(panel);
-        for (int row = 0, y = 90; y < 450; y += 44, row++) {
-            for (int x = 20 + (row % 2) * 44; x < 470; x += 88) {
+        for (int row = 0, y = 90; y < 460; y += 44, row++) {
+            for (int x = 20 + (row % 2) * 44; x < 540; x += 88) {
                 Path2D.Double pl = plus(x, y, 12);
                 g.setStroke(new BasicStroke(1.2f));
                 g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
@@ -672,11 +672,11 @@ final class Theme {
             g.setComposite(AlphaComposite.SrcOver.derive(k % 4 == 0 ? 0.14f : 0.07f));
             g.setColor(CYAN);
             g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
-            g.draw(new Ellipse2D.Double(112 - r, 267 - r, 2 * r, 2 * r));
+            g.draw(new Ellipse2D.Double(132 - r, 275 - r, 2 * r, 2 * r));
         }
         g.setComposite(AlphaComposite.SrcOver);
-        g.setPaint(new java.awt.GradientPaint(0, 104, new Color(255, 255, 255, 26), 0, 134, new Color(255, 255, 255, 0)));
-        g.fill(new Rectangle2D.Double(0, 74, 520, 30));
+        g.setPaint(new java.awt.GradientPaint(0, 106, new Color(255, 255, 255, 26), 0, 140, new Color(255, 255, 255, 0)));
+        g.fill(new Rectangle2D.Double(0, 84, 560, 56));
         for (int i = 0; i < 4; i++) {
             g.setComposite(AlphaComposite.SrcOver.derive(0.06f));
             g.setColor(COBALT);
@@ -691,23 +691,22 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(164, 79, 184, 74, 212, 74));
-        g.draw(line(76, 392, 92, 420, 112, 446, 140, 446));
+        g.draw(line(150, 93, 176, 84, 194, 98, 215, 106, 244, 106)); // the notch's corner (the Sport guide)
+        g.draw(line(64, 391, 74, 409, 96, 440, 124, 452, 156, 455));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(34, 180, 40, 260, 50, 320));
+        g.draw(line(25, 190, 33, 275, 58, 360)); // along the bezel, 7 px in
         g.setColor(CYAN);
-        g.draw(line(512, 82, 512, 176));
+        g.draw(new java.awt.geom.Arc2D.Double(720 - 265, 309 - 265, 530, 530, 148, 36, java.awt.geom.Arc2D.OPEN)); // along the dial
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 44, 112, 30, 6, 3, 0.55f);
-        BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 88, new Color(0xFF5FA8), 12);
+        BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 62, new Color(0xFF5FA8), 12);
         if (doll != null) {
-            g.drawImage(doll, 476 - doll.getWidth() / 2, 446 - doll.getHeight() + 12, null); // clear of the boost row
+            g.drawImage(doll, 446 - doll.getWidth() / 2, 455 - doll.getHeight() + 12, null); // right of the boost row, clear of the dial
         }
         // the white-haired chibi in the frame's top-right corner, right of the shift lights
-        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 92, new Color(0x2FD4FF), 12);
+        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 72, new Color(0x2FD4FF), 12);
         if (white != null) {
-            g.drawImage(white, 468 - white.getWidth() / 2, 202 - white.getHeight() + 12, null);
+            g.drawImage(white, 424 - white.getWidth() / 2, 184 - white.getHeight() + 12, null); // right of the shift lights and the lock percent
         }
         g.dispose();
     }

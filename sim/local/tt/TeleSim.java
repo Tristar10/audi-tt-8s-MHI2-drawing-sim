@@ -476,6 +476,16 @@ public final class TeleSim extends JPanel {
         + "C 1411 284 1427 227 1432 198 Q 1439 164 1413 142 C 1346 91 1222 43 1148 30 "
         + "C 1120 18 1108 27 1083 44 C 1046 67 1011 101 980 101 H 720 Z";
 
+    /** The visible area's outline in Sport, from ref/sport-clip-guide.svg. */
+    static final String SPORT_OUTLINE = "M720 60 C650 60 600 63 555 65 L513 96 Q490 99 470 96 H215 "
+        + "Q194 94 179 75 C128 87 52 115 22 153 Q3 169 9 190 C12 245 23 305 50 376 Q72 436 118 472 "
+        + "Q136 479 155 482 H1285 Q1304 479 1322 472 Q1368 436 1390 376 C1417 305 1428 245 1431 190 "
+        + "Q1437 169 1418 153 C1388 115 1312 87 1261 75 Q1246 94 1225 96 H970 Q950 99 927 96 "
+        + "L885 65 C840 63 790 60 720 60 Z";
+    /** Sport's bottom bar: everything below the guide's lower status strip line. */
+    static final String SPORT_BOTTOM_BAR = "M94 448 Q120 463 155 463 H1285 Q1320 463 1346 448 "
+        + "H1440 V540 H0 V448 Z";
+
     static Area visible(int view) {
         Area v;
         if (view == TeleLayout.VIEW_LARGE) {
@@ -485,10 +495,12 @@ public final class TeleSim extends JPanel {
             v.subtract(new Area(new Ellipse2D.Double(231 - 119, 389 - 117, 238, 234))); // rev counter
             v.subtract(new Area(new Ellipse2D.Double(1209 - 119, 389 - 117, 238, 234))); // speedometer
         } else {
-            v = new Area(new Polygon(new int[] {30, 200, 520, 520, 112, 92, 76, 62, 50, 40, 34},
-                new int[] {110, 50, 50, 446, 446, 420, 392, 362, 320, 260, 180}, 11)); // frame curve (car photos)
-            v.subtract(new Area(new Rectangle(180, 30, 300, 38))); // status line
-            v.subtract(new Area(new Ellipse2D.Double(791 - 290, 288 - 290, 580, 580))); // rev counter
+            // The user's Sport clipping guide (ref/sport-clip-guide.svg, 2026-11-24): the bezel with
+            // the status strip notch on top, minus the bottom bar below its strip, minus the big
+            // central rev counter.
+            v = new Area(SvgPath.parse(SPORT_OUTLINE));
+            v.subtract(new Area(SvgPath.parse(SPORT_BOTTOM_BAR)));
+            v.subtract(new Area(new Ellipse2D.Double(720 - 264, 309 - 264, 528, 528))); // rev counter
         }
         return v;
     }

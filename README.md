@@ -68,6 +68,10 @@ owner's manual's 620 x 272 cockpit screenshot; `skins/sport.skin` the big rev co
 - `java -cp out local.tt.ArtCost`: slots and picture pixels per view.
 - `java -cp out local.tt.ClipCheck [margin]`: every view, page and state against the visible area;
   lists anything the cluster's frame, dials or bars would cut. Run it after every layout change.
+- Visible areas come from the clipping guides in `ref/` (`classic-clip-guide.svg`,
+  `sport-clip-guide.svg`). `java -cp out local.tt.GuideOverlay IN.png OUT.png [0|1]` dims what the
+  cluster hides on a render (0 Classic, 1 Sport); `java -cp out local.tt.OutlinePts 1 8` prints the
+  Sport area shrunk 8 px as points for the layout's panel outline (`TeleLayout.SP_X/SP_Y`).
 
 ## Live data
 

@@ -209,7 +209,7 @@ final class Chrome {
 
     static void sport(Graphics2D g, int rpm, int mph) {
         backdrop(g);
-        bigDial(g, 791, 288, 290, rpm / 8000.0, mph);
+        bigDial(g, 720, 309, 264, rpm / 8000.0, mph);
         // status lines and the on-board computer card on the right
         Font f = font(false, 24);
         float x = 300;

@@ -66,6 +66,8 @@ owner's manual's 620 x 272 cockpit screenshot; `skins/sport.skin` the big rev co
 - `java -cp out local.tt.LinkBench [seed]`: the real receiver against the board's port-sweep
   contract (CarPlay holding ports, restarts, every port taken, board reboot).
 - `java -cp out local.tt.ArtCost`: slots and picture pixels per view.
+- `java -cp out local.tt.ClipCheck [margin]`: every view, page and state against the visible area;
+  lists anything the cluster's frame, dials or bars would cut. Run it after every layout change.
 
 ## Live data
 

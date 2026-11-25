@@ -465,7 +465,7 @@ public final class TeleSim extends JPanel {
     }
 
     /** What of our layer the car lets through: the cluster's window minus the stock parts above it. */
-    private static Area visible(int view) {
+    static Area visible(int view) {
         Area v;
         if (view == TeleLayout.VIEW_LARGE) {
             v = new Area(new Rectangle(0, 0, SW, SH));

@@ -284,15 +284,9 @@ final class Theme {
         g.setComposite(AlphaComposite.SrcOver.derive(0.55f));
         g.setColor(new Color(0x3E8BFF));
         g.setStroke(new BasicStroke(1f));
-        g.draw(new java.awt.geom.Line2D.Double(386, 378, 1062, 378));
-        g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
-        g.setColor(CYAN);
-        g.setStroke(new BasicStroke(2.6f));
-        double[][] ticks = {{382, 230, 1, 1}, {590, 230, -1, 1}, {382, 374, 1, -1}, {590, 374, -1, -1},
-            {850, 230, 1, 1}, {1064, 230, -1, 1}, {850, 374, 1, -1}, {1064, 374, -1, -1}};
-        for (double[] t : ticks) {
-            g.draw(line(t[0] + 10 * t[2], t[1], t[0], t[1], t[0], t[1] + 10 * t[3]));
-        }
+        // (the hairline over the temperature row is drawn by the layout, live page only)
+        // (the cyan corner ticks around the rpm and boost cells went 2026-11-25: on the Haldex page
+        // they framed nothing, like an aim box)
         // (the DRIVER / TURBO tabs went with tele17: the control page uses that space)
         // 4 the two characters' colours along the panel's sides
         g.setComposite(AlphaComposite.SrcOver.derive(0.95f));
@@ -888,6 +882,16 @@ final class Theme {
             g.drawImage(src, 0, 0, w, h, null);
         }
         g.dispose();
+        // 2026-11-25: the livery at 70 % so the drivetrain reads over it (an x-ray look)
+        for (int y = 0; y < h; y++) {
+            for (int x = 0; x < w; x++) {
+                int c = out.getRGB(x, y);
+                int r = (int) (((c >> 16) & 0xFF) * 0.7);
+                int gg = (int) (((c >> 8) & 0xFF) * 0.7);
+                int bb = (int) ((c & 0xFF) * 0.7);
+                out.setRGB(x, y, (c & 0xFF000000) | r << 16 | gg << 8 | bb);
+            }
+        }
         return out;
     }
 

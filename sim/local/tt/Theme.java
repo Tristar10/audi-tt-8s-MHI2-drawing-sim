@@ -694,15 +694,8 @@ final class Theme {
         g.setColor(CYAN);
         g.draw(new java.awt.geom.Arc2D.Double(720 - 265, 309 - 265, 530, 530, 148, 36, java.awt.geom.Arc2D.OPEN)); // along the dial
         g.setComposite(AlphaComposite.SrcOver);
-        BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 62, new Color(0xFF5FA8), 12);
-        if (doll != null) {
-            g.drawImage(doll, 446 - doll.getWidth() / 2, 455 - doll.getHeight() + 12, null); // right of the boost row, clear of the dial
-        }
-        // the white-haired chibi in the frame's top-right corner, right of the shift lights
-        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 72, new Color(0x2FD4FF), 12);
-        if (white != null) {
-            g.drawImage(white, 424 - white.getWidth() / 2, 184 - white.getHeight() + 12, null); // right of the shift lights and the lock percent
-        }
+        // (the two chibis are pictures of their own since 2026-11-25, sportChibi: the layout shows
+        // them on the live page only)
         g.dispose();
     }
 
@@ -778,6 +771,26 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+        // the Sport chibis (2026-11-25)
+        for (int k = 0; k < 2; k++) {
+            BufferedImage c = sportChibi(k == 0);
+            if (c == null) {
+                continue;
+            }
+            int[] px = c.getRGB(0, 0, c.getWidth(), c.getHeight(), null, 0, c.getWidth());
+            byte[] b = new byte[px.length * 4];
+            for (int i = 0; i < px.length; i++) {
+                b[4 * i] = (byte) (px[i] >> 16);
+                b[4 * i + 1] = (byte) (px[i] >> 8);
+                b[4 * i + 2] = (byte) px[i];
+                b[4 * i + 3] = (byte) (px[i] >>> 24);
+            }
+            java.io.File f = new java.io.File(dir, k == 0 ? "sp-chibi-white.rgba" : "sp-chibi-doll.rgba");
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(b);
+            o.close();
+            System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
+        }
         // the notch glow (2026-11-25)
         {
             BufferedImage c = notchGlow();
@@ -814,6 +827,26 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+    }
+
+    /**
+     * Sport's chibis as pictures (TeleLayout.SP_WHITE / SP_DOLL, at their fixed size): the
+     * white-haired one top right, the doll bottom right, standing on the bottom edge.
+     */
+    static BufferedImage sportChibi(boolean white) {
+        int w = white ? TeleLayout.SP_WHITE_W : TeleLayout.SP_DOLL_W;
+        int h = white ? TeleLayout.SP_WHITE_H : TeleLayout.SP_DOLL_H;
+        BufferedImage c = white
+            ? Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 72, new Color(0x2FD4FF), 12)
+            : Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 62, new Color(0xFF5FA8), 12);
+        if (c == null) {
+            return null;
+        }
+        BufferedImage im = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = im.createGraphics();
+        g.drawImage(c, (w - c.getWidth()) / 2, h - c.getHeight(), null);
+        g.dispose();
+        return im;
     }
 
     /**

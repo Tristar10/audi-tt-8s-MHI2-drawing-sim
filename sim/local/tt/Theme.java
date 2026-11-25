@@ -861,7 +861,7 @@ final class Theme {
 
     /**
      * The emblem the bloom reveals: the user's line art (skins/emblem.png) as dark wine lines,
-     * SP_EMBLEM_S square, soft at the edges. Nearly invisible on the navy panel, dark strokes on the
+     * SP_EMBLEM_S square, the whole square, a thin fade at its edge. Nearly invisible on the navy panel, dark strokes on the
      * red bloom, as the Viper's snake on its tach.
      */
     static BufferedImage sportEmblem() {
@@ -887,8 +887,10 @@ final class Theme {
                 int c = sc.getRGB(x, y);
                 double rg = (((c >> 16) & 0xFF) + ((c >> 8) & 0xFF)) / 510.0;
                 double ink = Math.max(0, Math.min(1, (1 - rg) * 1.9));
-                double d = Math.hypot(x - n / 2.0, y - n / 2.0) / (n / 2.0);
-                double fade = 1 - smooth((d - 0.62) / 0.38);
+                // the whole picture (user 2026-11-25: its sides were cut off): only a thin fade at
+                // the square's own edge
+                double e = Math.min(Math.min(x, n - 1 - x), Math.min(y, n - 1 - y)) / (n * 0.06);
+                double fade = smooth(e);
                 int a = (int) Math.round(255 * 0.85 * ink * fade);
                 im.setRGB(x, y, (a << 24) | (40 << 16) | (2 << 8) | 14);
             }

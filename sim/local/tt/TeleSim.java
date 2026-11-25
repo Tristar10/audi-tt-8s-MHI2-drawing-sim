@@ -512,6 +512,8 @@ public final class TeleSim extends JPanel {
             v = new Area(SvgPath.parse(SPORT_OUTLINE));
             v.subtract(new Area(SvgPath.parse(SPORT_BOTTOM_BAR)));
             v.subtract(new Area(new Ellipse2D.Double(720 - 264, 309 - 264, 528, 528))); // rev counter
+            // right of the tach is the stock instruments' (user 2026-11-25): ours ends at the dial
+            v.subtract(new Area(new Rectangle(720, 0, 720, 540)));
         }
         return v;
     }

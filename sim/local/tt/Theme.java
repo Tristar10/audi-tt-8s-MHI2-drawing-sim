@@ -61,6 +61,12 @@ final class Theme {
         stripes(g, new Rectangle2D.Double(0, 424, W, 40), COBALT, 0.55f);
         checker(g, 336, 448, 220, 12, 6, 0.30f);
         checker(g, 864, 448, 220, 12, 6, 0.30f);
+        // fender arches around the stock dials (user 2026-11-25: liked this contour best), at the
+        // dial centres from the user's clipping guide
+        arch(g, 231, 389, 150, 22, WHITE, 0.16f);
+        arch(g, 231, 389, 172, 6, CYAN, 0.35f);
+        arch(g, 1209, 389, 150, 22, WHITE, 0.16f);
+        arch(g, 1209, 389, 172, 6, CYAN, 0.35f);
         // target rings (the livery's circle motif), behind the left pocket and lower right
         rings(g, 140, 150, 40, 210, 16, CYAN, 0.30f);
         rings(g, 1330, 430, 30, 170, 14, CYAN, 0.22f);
@@ -105,17 +111,6 @@ final class Theme {
         }
         if (portraits > 0) {
             portraitsOn(out);
-        }
-        if (view == TeleLayout.VIEW_LARGE) {
-            // fender arches tight around the stock dials (measured: 235 / 1205, y 389, r 116), only
-            // on their outer side, under the housings: nothing reaches into the middle panel
-            Graphics2D ga = out.createGraphics();
-            ga.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            arcSpan(ga, 231, 389, 126, 6, WHITE, 0.30f, 95, 110); // dials from the user's clipping guide
-            arcSpan(ga, 231, 389, 133, 3, CYAN, 0.70f, 95, 110);
-            arcSpan(ga, 1209, 389, 126, 6, WHITE, 0.30f, -25, 110);
-            arcSpan(ga, 1209, 389, 133, 3, CYAN, 0.70f, -25, 110);
-            ga.dispose();
         }
         housings(out);
         chibis(out);
@@ -212,8 +207,8 @@ final class Theme {
                 g.fill(java.awt.geom.AffineTransform.getTranslateInstance(0, k * 1.5).createTransformedShape(sh));
             }
             // glow: wide faint strokes in cobalt
-            for (float w : new float[] {16f, 10f, 5f}) {
-                g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+            for (float w : new float[] {22f, 14f, 8f}) {
+                g.setComposite(AlphaComposite.SrcOver.derive(0.14f));
                 g.setColor(COBALT);
                 g.setStroke(new BasicStroke(w, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
                 g.draw(sh);
@@ -221,9 +216,14 @@ final class Theme {
             g.setComposite(AlphaComposite.SrcOver.derive(0.92f));
             g.setPaint(new java.awt.GradientPaint(0, 100, new Color(0x0A1230), 0, 440, new Color(0x03050C)));
             g.fill(sh);
-            g.setComposite(AlphaComposite.SrcOver.derive(0.75f));
-            g.setColor(new Color(0x3E8BFF));
-            g.setStroke(new BasicStroke(1.4f));
+            // 2026-11-25 (user: frames too thin): a 3 px edge with a bright 1 px core
+            g.setComposite(AlphaComposite.SrcOver.derive(0.85f));
+            g.setColor(new Color(0x2F6BFF));
+            g.setStroke(new BasicStroke(3.4f, BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
+            g.draw(sh);
+            g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
+            g.setColor(new Color(0x8FD8FF));
+            g.setStroke(new BasicStroke(1.1f));
             g.draw(sh);
         }
         // The panel's decoration (user 2026-11-24, no artwork): embossed crosses, cells with
@@ -253,10 +253,7 @@ final class Theme {
             g.setStroke(new BasicStroke(k % 4 == 0 ? 2.2f : 1f));
             g.draw(new Ellipse2D.Double(720 - r, 288 - r, 2 * r, 2 * r));
         }
-        g.setComposite(AlphaComposite.SrcOver.derive(0.18f));
-        g.setPaint(new RadialGradientPaint(720f, 288f, 150f, new float[] {0f, 1f},
-            new Color[] {new Color(0x1E46E0), new Color(0x1E46E0, true)}));
-        g.fill(notch);
+        // 6 the FL5's centre glow: its own picture (notchGlow), shown by the layout on the live page only
         // 5 dots fading in from the bottom corners
         g.setColor(CYAN);
         for (int y = 222; y < 432; y += 8) {
@@ -290,7 +287,7 @@ final class Theme {
         g.draw(new java.awt.geom.Line2D.Double(386, 378, 1062, 378));
         g.setComposite(AlphaComposite.SrcOver.derive(0.8f));
         g.setColor(CYAN);
-        g.setStroke(new BasicStroke(1.6f));
+        g.setStroke(new BasicStroke(2.6f));
         double[][] ticks = {{382, 230, 1, 1}, {590, 230, -1, 1}, {382, 374, 1, -1}, {590, 374, -1, -1},
             {850, 230, 1, 1}, {1064, 230, -1, 1}, {850, 374, 1, -1}, {1064, 374, -1, -1}};
         for (double[] t : ticks) {
@@ -298,8 +295,8 @@ final class Theme {
         }
         // (the DRIVER / TURBO tabs went with tele17: the control page uses that space)
         // 4 the two characters' colours along the panel's sides
-        g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
-        g.setStroke(new BasicStroke(2.4f));
+        g.setComposite(AlphaComposite.SrcOver.derive(0.95f));
+        g.setStroke(new BasicStroke(4.5f));
         g.setColor(new Color(0xFF5FA8));
         g.draw(line(370, 262, 370, 428));
         g.setColor(CYAN);
@@ -308,9 +305,9 @@ final class Theme {
         // corner brackets on the value panel (cyan), and a checker tab at its top left
         g.setComposite(AlphaComposite.SrcOver.derive(0.9f));
         g.setColor(CYAN);
-        g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
-        g.draw(line(370, 252, 370, 234, 388, 216, 408, 216));
-        g.draw(line(1032, 430, 1052, 430, 1070, 412, 1070, 392));
+        g.setStroke(new BasicStroke(5.5f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
+        g.draw(line(370, 256, 370, 234, 388, 216, 414, 216));
+        g.draw(line(1026, 430, 1052, 430, 1070, 412, 1070, 388));
         g.setComposite(AlphaComposite.SrcOver);
         checker(g, 392, 220, 30, 6, 3, 0.55f);
         // the strip's corner marks: small cyan ticks where its slopes meet the middle
@@ -351,8 +348,10 @@ final class Theme {
         // The first portraits' look (user: "good already"), zoomed out a little, each centred on
         // the point between the eyes; pink turned clockwise to follow the rising slope.
         // art eye centre, scale, turn (deg, clockwise), screen centre, fade oval w h
-        turnedPortrait(out, art, 967, 685, 0.40, 22, 142, 132, 320, 380);   // pink, left
-        turnedPortrait(out, art, 1427, 452, 0.42, 0, 1335, 132, 300, 370);  // white-haired, right
+        // 2026-11-25: pink zoomed out a little; white-haired lower (more forehead, less chin), clear
+        // of the Haldex readout
+        turnedPortrait(out, art, 967, 685, 0.36, 22, 142, 132, 320, 380);   // pink, left
+        turnedPortrait(out, art, 1427, 452, 0.42, 0, 1335, 168, 300, 370);  // white-haired, right
     }
 
     /**
@@ -597,13 +596,15 @@ final class Theme {
     /** Two chibi stickers standing on the rev strip's top corners, outside the shift-light rail. */
     private static void chibis(BufferedImage out) {
         Graphics2D g = out.createGraphics();
-        BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 84, new Color(0xFF5FA8), 12);
-        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 82, new Color(0x2FD4FF), 12);
+        // 2026-11-25 (user): between the stock dials and the value panel, in the pocket above each
+        // dial's inner shoulder and under the strip
+        BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 66, new Color(0xFF5FA8), 12);
+        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 66, new Color(0x2FD4FF), 12);
         if (pink != null) {
-            g.drawImage(pink, 352 - pink.getWidth() / 2, 128 - pink.getHeight() + 12, null); // inside the guide's top edge
+            g.drawImage(pink, 338 - pink.getWidth() / 2, 300 - pink.getHeight() + 12, null);
         }
         if (white != null) {
-            g.drawImage(white, 1096 - white.getWidth() / 2, 128 - white.getHeight() + 12, null); // inside the guide's top edge
+            g.drawImage(white, 1102 - white.getWidth() / 2, 300 - white.getHeight() + 12, null);
         }
         g.dispose();
     }
@@ -783,6 +784,23 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+        // the notch glow (2026-11-25)
+        {
+            BufferedImage c = notchGlow();
+            int[] px = c.getRGB(0, 0, c.getWidth(), c.getHeight(), null, 0, c.getWidth());
+            byte[] b = new byte[px.length * 4];
+            for (int i = 0; i < px.length; i++) {
+                b[4 * i] = (byte) (px[i] >> 16);
+                b[4 * i + 1] = (byte) (px[i] >> 8);
+                b[4 * i + 2] = (byte) px[i];
+                b[4 * i + 3] = (byte) (px[i] >>> 24);
+            }
+            java.io.File f = new java.io.File(dir, "notch-glow.rgba");
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(b);
+            o.close();
+            System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
+        }
         // the painted strip's pictures (tele21: the head unit took 4.7 s to paint them)
         TeleStrip st = TeleStrip.paint(new TeleLayout());
         int[][] sp = {st.track, st.lit, st.litRed};
@@ -802,6 +820,43 @@ final class Theme {
             o.close();
             System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
         }
+    }
+
+    /**
+     * The FL5's centre glow for Classic's gear notch (user 2026-11-25), TeleLayout.NOTCH_GLOW_W x _H at
+     * the notch's top left (NOTCH_X0, LINE_Y): a warm red core behind the gear fading out to the
+     * notch's sides, fine rays fanning up from below, a hot rim under the red line. Not
+     * premultiplied (the head unit premultiplies on reading).
+     */
+    static BufferedImage notchGlow() {
+        int w = TeleLayout.NOTCH_GLOW_W;
+        int h = TeleLayout.NOTCH_GLOW_H;
+        BufferedImage im = new BufferedImage(w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g = im.createGraphics();
+        g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
+        g.translate(-596, -226);
+        Path2D.Double notch = path(596, 226, 844, 226, 814, 350, 626, 350);
+        g.clip(notch);
+        g.setPaint(new RadialGradientPaint(new java.awt.geom.Point2D.Float(720f, 292f), 150f,
+            new java.awt.geom.Point2D.Float(720f, 292f), new float[] {0f, 0.35f, 0.7f, 1f},
+            new Color[] {new Color(255, 120, 70, 245), new Color(240, 40, 40, 185), new Color(160, 12, 36, 80),
+                new Color(80, 0, 30, 0)},
+            java.awt.MultipleGradientPaint.CycleMethod.NO_CYCLE, java.awt.MultipleGradientPaint.ColorSpaceType.SRGB,
+            new java.awt.geom.AffineTransform(1.25, 0, 0, 0.85, -180, 44)));
+        g.fill(notch);
+        g.setStroke(new BasicStroke(1f));
+        for (double t = -64; t <= 64; t += 2.4) {
+            double r = Math.toRadians(t);
+            g.setComposite(AlphaComposite.SrcOver.derive(0.10f));
+            g.setColor(new Color(0xFFC0A0));
+            g.draw(new java.awt.geom.Line2D.Double(720 + 40 * Math.sin(r), 420 - 40 * Math.cos(r),
+                720 + 260 * Math.sin(r), 420 - 260 * Math.cos(r)));
+        }
+        g.setComposite(AlphaComposite.SrcOver);
+        g.setPaint(new java.awt.GradientPaint(0, 226, new Color(255, 120, 70, 120), 0, 246, new Color(255, 60, 40, 0)));
+        g.fill(new Rectangle2D.Double(596, 226, 248, 20));
+        g.dispose();
+        return im;
     }
 
     /**

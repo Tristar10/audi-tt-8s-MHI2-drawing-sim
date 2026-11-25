@@ -60,7 +60,7 @@ public final class TeleSim extends JPanel {
     private BufferedImage stripTrack;
     private BufferedImage stripLit;
     private BufferedImage stripLitRed;
-    private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true)};
+    private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true), Theme.notchGlow()};
 
     private volatile int view = TeleLayout.VIEW_LARGE;
     private volatile boolean painted = true;
@@ -239,6 +239,7 @@ public final class TeleSim extends JPanel {
             layout.paintedStrip = painted;
             layout.themed = theme;
             layout.carArt = carPic[0] != null && carPic[1] != null;
+            layout.glowArt = true;
             layout.build(view, ui.page());
             long t1 = System.nanoTime();
             synchronized (frame) {

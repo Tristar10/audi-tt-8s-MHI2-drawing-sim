@@ -86,11 +86,11 @@ public final class TeleSim extends JPanel {
     /** --set overrides: channel -> value (x1000), applied after demo or live values. */
     private final Map<Integer, Integer> fixed = new HashMap<Integer, Integer>();
     private static final String[] SET_NAMES = {"rpm", "speed", "pedal", "coolant", "oil", "iat", "boost", "brake",
-        "hxt", "hxa", "gear", "dsg", "clutch", "preset", "steer", "mode", "lockset"};
+        "hxt", "hxa", "gear", "dsg", "clutch", "preset", "steer", "mode", "lockset", "lc"};
     private static final int[] SET_CH = {TeleLayout.CH_RPM, TeleLayout.CH_SPEED, TeleLayout.CH_PEDAL,
         TeleLayout.CH_COOLANT, TeleLayout.CH_OIL, TeleLayout.CH_IAT, TeleLayout.CH_BOOST, TeleLayout.CH_BRAKE,
         TeleLayout.CH_HX_TARGET, TeleLayout.CH_HX_ACTUAL, TeleLayout.CH_GEAR, TeleLayout.CH_DSG,
-        TeleLayout.CH_CLUTCH, TeleLayout.CH_PRESET, TeleLayout.CH_STEER, TeleLayout.CH_MODE, TeleLayout.CH_LOCK_SET};
+        TeleLayout.CH_CLUTCH, TeleLayout.CH_PRESET, TeleLayout.CH_STEER, TeleLayout.CH_MODE, TeleLayout.CH_LOCK_SET, TeleLayout.CH_LAUNCH};
     private String shotFile;
 
     // demo sampling and glide

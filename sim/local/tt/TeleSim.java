@@ -468,16 +468,22 @@ public final class TeleSim extends JPanel {
     }
 
     /** What of our layer the car lets through: the cluster's window minus the stock parts above it. */
+    /** The visible area's outline in Classic, from ref/classic-clip-guide.svg. */
+    static final String CLASSIC_OUTLINE = "M 720 101 H 460 C 429 101 394 67 357 44 C 332 27 320 18 292 30 "
+        + "C 218 43 94 91 27 142 Q 1 164 8 198 C 13 227 29 284 51 340 C 72 400 97 465 151 493 "
+        + "Q 195 517 241 508 C 286 503 313 480 339 471 Q 354 465 377 465 H 1063 Q 1086 465 1101 471 "
+        + "C 1127 480 1154 503 1199 508 Q 1245 517 1289 493 C 1343 465 1368 400 1389 340 "
+        + "C 1411 284 1427 227 1432 198 Q 1439 164 1413 142 C 1346 91 1222 43 1148 30 "
+        + "C 1120 18 1108 27 1083 44 C 1046 67 1011 101 980 101 H 720 Z";
+
     static Area visible(int view) {
         Area v;
         if (view == TeleLayout.VIEW_LARGE) {
-            v = new Area(new Rectangle(0, 0, SW, SH));
-            v.subtract(new Area(new Ellipse2D.Double(235 - 116, 389 - 116, 232, 232))); // rev counter: measured on the car photo (2026-11-24)
-            v.subtract(new Area(new Ellipse2D.Double(1205 - 116, 389 - 116, 232, 232))); // speedometer
-            v.subtract(new Area(new Rectangle(440, 40, 560, 54))); // tab bar, centred on 720
-            v.subtract(new Area(new Rectangle(0, 464, SW, 76))); // bottom bar
-            v.subtract(new Area(new Polygon(new int[] {0, 290, 0}, new int[] {0, 0, 110}, 3))); // frame
-            v.subtract(new Area(new Polygon(new int[] {1100, 1440, 1440}, new int[] {0, 0, 108}, 3)));
+            // The user's clipping guide (ref/classic-clip-guide.svg, 2026-11-24): the visible area
+            // inside the bezel, minus the tab bar notch and bottom bar, minus the two stock dials.
+            v = new Area(SvgPath.parse(CLASSIC_OUTLINE));
+            v.subtract(new Area(new Ellipse2D.Double(231 - 119, 389 - 117, 238, 234))); // rev counter
+            v.subtract(new Area(new Ellipse2D.Double(1209 - 119, 389 - 117, 238, 234))); // speedometer
         } else {
             v = new Area(new Polygon(new int[] {30, 200, 520, 520, 112, 92, 76, 62, 50, 40, 34},
                 new int[] {110, 50, 50, 446, 446, 420, 392, 362, 320, 260, 180}, 11)); // frame curve (car photos)

@@ -111,10 +111,10 @@ final class Theme {
             // on their outer side, under the housings: nothing reaches into the middle panel
             Graphics2D ga = out.createGraphics();
             ga.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
-            arcSpan(ga, 235, 389, 124, 6, WHITE, 0.30f, 95, 110);
-            arcSpan(ga, 235, 389, 131, 3, CYAN, 0.70f, 95, 110);
-            arcSpan(ga, 1205, 389, 124, 6, WHITE, 0.30f, -25, 110);
-            arcSpan(ga, 1205, 389, 131, 3, CYAN, 0.70f, -25, 110);
+            arcSpan(ga, 231, 389, 126, 6, WHITE, 0.30f, 95, 110); // dials from the user's clipping guide
+            arcSpan(ga, 231, 389, 133, 3, CYAN, 0.70f, 95, 110);
+            arcSpan(ga, 1209, 389, 126, 6, WHITE, 0.30f, -25, 110);
+            arcSpan(ga, 1209, 389, 133, 3, CYAN, 0.70f, -25, 110);
             ga.dispose();
         }
         housings(out);
@@ -203,7 +203,7 @@ final class Theme {
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
         Area strip = stripShape(12);
         Path2D.Double panel = path(388, 216, 1070, 216, 1070, 412, 1052, 430, 370, 430, 370, 234); // centred on 720, a clear gap to the dials
-        Area rail = new Area(new Rectangle2D.Double(720 - 338, 96, 676, 36));
+        Area rail = new Area(new Rectangle2D.Double(720 - 338, 102, 676, 34));
         for (Shape sh : new Shape[] {strip, panel, rail}) {
             // drop shadow: the shape a few times, offset down, faint
             for (int k = 1; k <= 6; k++) {
@@ -597,13 +597,13 @@ final class Theme {
     /** Two chibi stickers standing on the rev strip's top corners, outside the shift-light rail. */
     private static void chibis(BufferedImage out) {
         Graphics2D g = out.createGraphics();
-        BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 104, new Color(0xFF5FA8), 14);
-        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 100, new Color(0x2FD4FF), 14);
+        BufferedImage pink = Cutout.sticker(new java.io.File("skins", "chibi-pink.jpg"), 84, new Color(0xFF5FA8), 12);
+        BufferedImage white = Cutout.sticker(new java.io.File("skins", "chibi-white.jpg"), 82, new Color(0x2FD4FF), 12);
         if (pink != null) {
-            g.drawImage(pink, 334 - pink.getWidth() / 2, 122 - pink.getHeight() + 14, null); // clear of the rail (tele24)
+            g.drawImage(pink, 352 - pink.getWidth() / 2, 128 - pink.getHeight() + 12, null); // inside the guide's top edge
         }
         if (white != null) {
-            g.drawImage(white, 1118 - white.getWidth() / 2, 124 - white.getHeight() + 14, null); // clear of the strip (tele24)
+            g.drawImage(white, 1096 - white.getWidth() / 2, 128 - white.getHeight() + 12, null); // inside the guide's top edge
         }
         g.dispose();
     }

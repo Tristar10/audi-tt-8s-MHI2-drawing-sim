@@ -476,7 +476,8 @@ public final class TeleSim extends JPanel {
             v.subtract(new Area(new Polygon(new int[] {0, 290, 0}, new int[] {0, 0, 110}, 3))); // frame
             v.subtract(new Area(new Polygon(new int[] {1100, 1440, 1440}, new int[] {0, 0, 108}, 3)));
         } else {
-            v = new Area(new Polygon(new int[] {0, 200, 520, 520, 0}, new int[] {110, 50, 50, 468, 468}, 5));
+            v = new Area(new Polygon(new int[] {30, 200, 520, 520, 112, 92, 76, 62, 50, 40, 34},
+                new int[] {110, 50, 50, 446, 446, 420, 392, 362, 320, 260, 180}, 11)); // frame curve (car photos)
             v.subtract(new Area(new Rectangle(180, 30, 300, 38))); // status line
             v.subtract(new Area(new Ellipse2D.Double(791 - 290, 288 - 290, 580, 580))); // rev counter
         }

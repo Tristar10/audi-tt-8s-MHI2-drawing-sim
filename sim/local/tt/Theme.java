@@ -685,14 +685,14 @@ final class Theme {
         g.setColor(CYAN);
         g.setStroke(new BasicStroke(3f, BasicStroke.CAP_BUTT, BasicStroke.JOIN_MITER));
         g.draw(line(164, 79, 184, 74, 212, 74));
-        g.draw(line(8, 430, 8, 460, 40, 460));
+        g.draw(line(76, 392, 92, 420, 112, 446, 140, 446));
         g.setStroke(new BasicStroke(2.4f));
         g.setColor(new Color(0xFF5FA8));
-        g.draw(line(8, 160, 8, 330));
+        g.draw(line(34, 180, 40, 260, 50, 320));
         g.setColor(CYAN);
         g.draw(line(512, 82, 512, 176));
         g.setComposite(AlphaComposite.SrcOver);
-        checker(g, 22, 112, 30, 6, 3, 0.55f);
+        checker(g, 44, 112, 30, 6, 3, 0.55f);
         BufferedImage doll = Cutout.sticker(new java.io.File("skins", "chibi-doll.jpg"), 88, new Color(0xFF5FA8), 12);
         if (doll != null) {
             g.drawImage(doll, 462 - doll.getWidth() / 2, 456 - doll.getHeight() + 12, null);
@@ -772,6 +772,25 @@ final class Theme {
                 b[4 * i + 3] = (byte) (px[i] >>> 24);
             }
             java.io.File f = new java.io.File(dir, "hx-car-" + cn[k] + ".rgba");
+            java.io.FileOutputStream o = new java.io.FileOutputStream(f);
+            o.write(b);
+            o.close();
+            System.out.println("wrote " + f.getPath() + " (" + b.length + " bytes)");
+        }
+        // the painted strip's pictures (tele21: the head unit took 4.7 s to paint them)
+        TeleStrip st = TeleStrip.paint(new TeleLayout());
+        int[][] sp = {st.track, st.lit, st.litRed};
+        String[] sn = {"strip-track", "strip-lit", "strip-red"};
+        for (int k = 0; k < 3; k++) {
+            byte[] b = new byte[sp[k].length * 4];
+            for (int i = 0; i < sp[k].length; i++) {
+                int px = sp[k][i];
+                b[4 * i] = (byte) (px >> 16);
+                b[4 * i + 1] = (byte) (px >> 8);
+                b[4 * i + 2] = (byte) px;
+                b[4 * i + 3] = (byte) (px >>> 24);
+            }
+            java.io.File f = new java.io.File(dir, sn[k] + ".rgba");
             java.io.FileOutputStream o = new java.io.FileOutputStream(f);
             o.write(b);
             o.close();

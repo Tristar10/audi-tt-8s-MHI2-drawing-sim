@@ -625,6 +625,14 @@ final class Theme {
      * gear, pink and cyan side lines, corner brackets, glass light), and the doll chibi in the gap
      * between the panel and the rev counter.
      */
+    /** Sport portrait (skins/sport-portrait.png): the point between her eyes, scale, where it lands. */
+    static double SP_EYE_X = 1131;
+    static double SP_EYE_Y = 600;
+    static double SP_PORTRAIT_SCALE = 0.12;
+    static double SP_PORTRAIT_TURN = -24; // her eyes level
+    static double SP_PORTRAIT_X = 88;
+    static double SP_PORTRAIT_Y = 150;
+
     private static void sport(BufferedImage img) {
         Graphics2D g = img.createGraphics();
         g.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);
@@ -679,6 +687,18 @@ final class Theme {
             g.draw(panel);
         }
         g.setClip(oldClip);
+        // 2026-11-25 (user): a portrait in the panel's top-left, as Classic's corner portraits:
+        // centred on her eyes, dimmed, faded softly, her face in the pocket left of the data
+        if (portraits > 0) {
+            try {
+                BufferedImage art = javax.imageio.ImageIO.read(new java.io.File("skins", "sport-portrait.png"));
+                if (art != null) {
+                    turnedPortrait(img, art, SP_EYE_X, SP_EYE_Y, SP_PORTRAIT_SCALE, SP_PORTRAIT_TURN, SP_PORTRAIT_X, SP_PORTRAIT_Y, 250, 300);
+                }
+            } catch (Exception e) {
+                System.out.println("no skins/sport-portrait.png: no Sport portrait");
+            }
+        }
         g.setComposite(AlphaComposite.SrcOver.derive(0.75f));
         g.setColor(new Color(0x3E8BFF));
         g.setStroke(new BasicStroke(1.4f));

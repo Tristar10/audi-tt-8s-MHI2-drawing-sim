@@ -62,6 +62,8 @@ public final class TeleSim extends JPanel {
     private BufferedImage stripLitRed;
     /** --noshadow: the layout without its text, bar and icon shadows (before/after renders). */
     static boolean noShadow;
+    /** L key: launch off / armed / ready (fixed brake, throttle, speed and lock). */
+    private int launchStep;
     private final BufferedImage[] carPic = {Theme.carPicture(false), Theme.carPicture(true), Theme.notchGlow(),
         Theme.sportChibi(true), Theme.sportChibi(false), Theme.sportBloom(), Theme.sportEmblem(),
         Theme.sportBloomHot()};
@@ -329,9 +331,11 @@ public final class TeleSim extends JPanel {
         for (int k = 0; k < GLIDE_CH.length; k++) {
             lastRaw[GLIDE_CH[k]] = layout.val[GLIDE_CH[k]];
         }
-        for (Map.Entry<Integer, Integer> e : fixed.entrySet()) {
-            layout.val[e.getKey()] = e.getValue();
-            layout.has[e.getKey()] = true;
+        synchronized (fixed) { // the L key changes it from the window's thread
+            for (Map.Entry<Integer, Integer> e : fixed.entrySet()) {
+                layout.val[e.getKey()] = e.getValue();
+                layout.has[e.getKey()] = true;
+            }
         }
         if (glide) {
             teleGlide.apply(layout, now, demo && fresh); // the head unit's own glide (TeleGlide)
@@ -583,6 +587,22 @@ public final class TeleSim extends JPanel {
             case KeyEvent.VK_BACK_SPACE:
             case KeyEvent.VK_ESCAPE:
                 TeleUi.post(TeleUi.BACK);
+                break;
+            case KeyEvent.VK_L:
+                // launch: off -> armed (lock 40 %) -> ready (lock 100 %) -> off
+                launchStep = (launchStep + 1) % 3;
+                synchronized (fixed) {
+                    int[] ch = {TeleLayout.CH_SPEED, TeleLayout.CH_PEDAL, TeleLayout.CH_BRAKE, TeleLayout.CH_HX_ACTUAL};
+                    if (launchStep == 0) {
+                        for (int c : ch)
+                            fixed.remove(c);
+                    } else {
+                        fixed.put(TeleLayout.CH_SPEED, 0);
+                        fixed.put(TeleLayout.CH_PEDAL, 45000);
+                        fixed.put(TeleLayout.CH_BRAKE, 62000);
+                        fixed.put(TeleLayout.CH_HX_ACTUAL, launchStep == 1 ? 40000 : 100000);
+                    }
+                }
                 break;
             case KeyEvent.VK_T:
                 theme = !theme;

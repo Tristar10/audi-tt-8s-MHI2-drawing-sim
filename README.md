@@ -42,6 +42,8 @@ Keys in the window:
 | B | Background: stock cockpit drawn clean / phone photo / black (`--black` starts on black) |
 | T | Itasha theme on / off (`--theme`; `--portraits colour` or `tint` adds the large portraits) |
 | O | Haldex control pop-up; then Up/Down, Enter (edit / send), Backspace (cancel / close) |
+| Up/Down | With the pop-up closed: live page / Haldex page |
+| L | Launch banner: off / armed (lock 40 %) / ready (lock 100 %) |
 | H | Readout on / off (tick rate, frames drawn, layout and draw time, link) |
 | S | Save the frame as `sim-<time>.png` |
 
